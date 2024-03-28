@@ -6,7 +6,9 @@ let create_window () =
   window
 
 let create_grid () =
-  let grid = GtkGrid.grid ~columns:9 ~rows:9 ~row_spacing:2 ~column_spacing:2 () in
+  let grid =
+    GPack.table ~columns:9 ~rows:9 ~row_spacing:2 ~column_spacing:2 ()
+  in
   for i = 0 to 8 do
     for j = 0 to 8 do
       let entry = GEdit.entry ~width_chars:1 ~max_length:1 () in
