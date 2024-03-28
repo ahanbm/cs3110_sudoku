@@ -1,4 +1,4 @@
 (executable
  (public_name cs3110_sudoku)
  (name main)
- (libraries lablgtk2 cs3110_sudoku))
+ (libraries lablgtk2 cs3110_sudoku str))
