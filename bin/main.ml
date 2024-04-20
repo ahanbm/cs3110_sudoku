@@ -1,7 +1,9 @@
-(**@author: Peter Favero pmf66*)
+(**@authors: Peter Favero pmf66*)
 (*To compile, run:
    dune exec ./bin/main.exe 
   in the terminal *)
+
+  exception Break
 
 let welcome_user = print_endline 
 "
@@ -42,12 +44,12 @@ let immutable_cells = CellSet.add (2,2) immutable_cells;;
 let sudoku_grid = Array.make_matrix 9 9 (0, "none");;
 sudoku_grid.(2).(2) <- (9, "blue")
 
-
-
+(* Clears the current line *)
 let clear_line () =
   output_string stdout "\027[A\027[2K";
   flush stdout
 
+(* Gets input from the user in the desired format and forbids changing of immutable blue cells *)
 let rec get_input immutable_cells = 
   let input_string = read_line () in
   let regex = Str.regexp "^\\([1-9]\\) \\([1-9]\\) \\([1-9]\\)$" in
@@ -63,6 +65,30 @@ let rec get_input immutable_cells =
       (row, col, number)
   else let () = clear_line () in get_input immutable_cells
 
+(* Function to check each row of the sudoku grid and update their color if necessary *)
+  let check_all_rows sudoku_grid =
+    let erroneous_rows = ref [] in
+    let completed_rows = ref [] in
+    for row = 0 to 8 do (* Start row loop *)
+      let seen = Hashtbl.create 9 in
+      begin (* Start col loop *)
+        try 
+          for col = 0 to 8 do
+            let value = sudoku_grid.(row).(col) in
+            if value <> 0 then
+              if Hashtbl.mem seen value then
+                begin
+                  erroneous_rows := row :: !erroneous_rows;
+                  raise Break  (* break the col loop *)
+                end
+              else
+                Hashtbl.add seen value true
+          done
+        with Break -> ()  (* Catching the Break to exit the inner loop *)
+      end; (* End col loop *)
+      if (Hashtbl.length seen = 9) then completed_rows := row :: !completed_rows
+    done; (* End row loop *)
+    (!erroneous_rows, !completed_rows) (* return values *)
 
 (* This code was written using information from GPT-4 *)
 (* Function to print the sudoku grid *)
@@ -88,7 +114,7 @@ let print_sudoku_grid grid =
             Printf.printf "\027[34m. \027[0m"
           else 
             Printf.printf "\027[34m%d \027[0m" value
-      | _ ->  (* Treat all other colors as "none", butn only "none" should be used. *)
+      | _ ->  (* Treat all other colors as "none", but only "none" should be used. *)
           if value = 0 then 
             print_string ". "
           else 
@@ -98,6 +124,7 @@ let print_sudoku_grid grid =
   done;
   print_endline "-------------------------";;
 
+(* Runs game *)
 let rec run_game (sudoku_grid : (int*string) array array) (grid_solved : bool) (move_count : int) =
   match grid_solved with 
   | true -> print_endline ("Congrats, you won!\nYou solved this sudoku puzzle in " ^ (string_of_int move_count) ^ " moves!\nGreat job! We encourage you to play another exciting game of sudoku.\n");
