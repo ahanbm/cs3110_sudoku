@@ -41,8 +41,8 @@ module CellSet = Set.Make(Cell);;
 let immutable_cells = CellSet.empty;;
 let immutable_cells = CellSet.add (2,2) immutable_cells;;
 
-let sudoku_grid = Array.make_matrix 9 9 (0, "none");;
-sudoku_grid.(2).(2) <- (9, "blue")
+let sudoku_grid = Array.make_matrix 9 9 0;;
+sudoku_grid.(2).(2) <- 9;;
 
 (* Clears the current line *)
 let clear_line () =
@@ -65,39 +65,67 @@ let rec get_input immutable_cells =
       (row, col, number)
   else let () = clear_line () in get_input immutable_cells
 
+  module IntSet = Set.Make(Int)
+
 (* Function to check each row of the sudoku grid and update their color if necessary *)
-  let check_all_rows sudoku_grid =
-    let erroneous_rows = ref [] in
-    let completed_rows = ref [] in
-    for row = 0 to 8 do (* Start row loop *)
-      let seen = Hashtbl.create 9 in
-      begin (* Start col loop *)
-        try 
-          for col = 0 to 8 do
-            let value = sudoku_grid.(row).(col) in
-            if value <> 0 then
-              if Hashtbl.mem seen value then
-                begin
-                  erroneous_rows := row :: !erroneous_rows;
-                  raise Break  (* break the col loop *)
-                end
-              else
-                Hashtbl.add seen value true
-          done
-        with Break -> ()  (* Catching the Break to exit the inner loop *)
-      end; (* End col loop *)
-      if (Hashtbl.length seen = 9) then completed_rows := row :: !completed_rows
-    done; (* End row loop *)
-    (!erroneous_rows, !completed_rows) (* return values *)
+let check_all_rows sudoku_grid =
+  let erroneous_rows = ref IntSet.empty in
+  let completed_rows = ref IntSet.empty in
+  for row = 0 to 8 do (* Start row loop *)
+    let seen = Hashtbl.create 9 in
+    begin (* Start col loop *)
+      try 
+        for col = 0 to 8 do
+          let value = sudoku_grid.(row).(col) in
+          if value <> 0 then
+            if Hashtbl.mem seen value then
+              begin
+                erroneous_rows := IntSet.add row !erroneous_rows;
+                raise Exit  (* break the col loop using Exit *)
+              end
+            else
+              Hashtbl.add seen value true
+        done
+      with Exit -> ()  (* Catching the Exit to exit the inner loop *)
+    end; (* End col loop *)
+    if Hashtbl.length seen = 9 then completed_rows := IntSet.add row !completed_rows
+  done; (* End row loop *)
+  (!erroneous_rows, !completed_rows) (* return values *)
+
+(* Function to check each col of the sudoku grid and update their color if necessary *)
+let check_all_rows sudoku_grid =
+  let erroneous_cols = ref IntSet.empty in
+  let completed_cols = ref IntSet.empty in
+  for col = 0 to 8 do (* Start row loop *)
+    let seen = Hashtbl.create 9 in
+    begin (* Start col loop *)
+      try 
+        for row = 0 to 8 do
+          let value = sudoku_grid.(row).(col) in
+          if value <> 0 then
+            if Hashtbl.mem seen value then
+              begin
+                erroneous_cols := IntSet.add col !erroneous_cols;
+                raise Exit  (* break the col loop using Exit *)
+              end
+            else
+              Hashtbl.add seen value true
+        done
+      with Exit -> ()  (* Catching the Exit to exit the inner loop *)
+    end; (* End col loop *)
+    if Hashtbl.length seen = 9 then completed_cols := IntSet.add col !completed_cols
+  done; (* End row loop *)
+  (!erroneous_cols, !completed_cols) (* return values *)
 
 (* This code was written using information from GPT-4 *)
 (* Function to print the sudoku grid *)
-let print_sudoku_grid grid =
-  for i = 0 to 8 do
-    if i mod 3 = 0 then print_endline "-------------------------";
-    for j = 0 to 8 do
-      if j mod 3 = 0 then print_string "| ";
-      let (value, color) = grid.(i).(j) in
+let print_sudoku_grid grid erroneous_rows erroneous_cols completed_rows completed_cols immutable_cells =
+  for row = 0 to 8 do
+    if row mod 3 = 0 then print_endline "-------------------------";
+    for col = 0 to 8 do
+      if col mod 3 = 0 then print_string "| ";
+      let value = grid.(row).(col) in
+
       match color with
       | "red" -> (* error in the current group *)
           if value = 0 then 
@@ -125,17 +153,19 @@ let print_sudoku_grid grid =
   print_endline "-------------------------";;
 
 (* Runs game *)
-let rec run_game (sudoku_grid : (int*string) array array) (grid_solved : bool) (move_count : int) =
+let rec run_game (sudoku_grid : int array array) (immutable_cells : CellSet.t) (grid_solved : bool) (move_count : int) =
   match grid_solved with 
   | true -> print_endline ("Congrats, you won!\nYou solved this sudoku puzzle in " ^ (string_of_int move_count) ^ " moves!\nGreat job! We encourage you to play another exciting game of sudoku.\n");
   | false -> 
     print_endline ("Sudoku Board | Move " ^ (string_of_int (move_count-1)) ^ " :");
-    print_sudoku_grid sudoku_grid;
+    let (erroneous_rows, completed_rows) = check_all_rows sudoku_grid in 
+    let (erroneous_cols, completed_cols) = check_all_rows sudoku_grid in 
+    print_sudoku_grid sudoku_grid completed_rows completed_cols erroneous_rows erroneous_cols immutable_cells;
     let (row, col, number) = get_input immutable_cells in
-    sudoku_grid.(row-1).(col-1) <- (number, (snd sudoku_grid.(row-1).(col-1)));
-    run_game sudoku_grid (row+col == number) (move_count+1);
+    sudoku_grid.(row-1).(col-1) <- number;
+    run_game sudoku_grid immutable_cells (row+col == number) (move_count+1);
 
 (* Execute the print function to display the grid *)
 welcome_user;;
 help_user;;
-run_game sudoku_grid false 1;;
+run_game sudoku_grid immutable_cells false 1;;
