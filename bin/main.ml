@@ -27,12 +27,12 @@ Good luck! You've got this! Happy sudoku-solving!
 ";;
 
 
-(* Type for the set of cells we use to check wether a cell's value can be changed *)
-module Cell = struct
+(* Type for the set of pairs of ints we use to check wether a cell's value can be changed *)
+module Pair = struct
   type t = int * int
   let compare = compare
 end
-module CellSet = Set.Make(Cell);;
+module PairSet = Set.Make(Pair);;
 
 (* Type for the set of ints we use to check wether a row/coll is erroneous *)
 module Integer = struct 
@@ -45,8 +45,8 @@ let cardinality_of_int_set set =
   IntegerSet.fold (fun _ acc -> acc + 1) set 0
 
 (* Initialize the set of cells and grid with one immutable value for testing *)
-let immutable_cells = CellSet.empty;;
-let immutable_cells = CellSet.add (2,2) immutable_cells;;
+let immutable_cells = PairSet.empty;;
+let immutable_cells = PairSet.add (2,2) immutable_cells;;
 
 let sudoku_grid = Array.make_matrix 9 9 0;;
 sudoku_grid.(2).(2) <- 9;;
@@ -64,7 +64,7 @@ let rec get_input immutable_cells =
     let row = int_of_string (Str.matched_group 1 input_string) in
     let col = int_of_string (Str.matched_group 2 input_string) in
     let number = int_of_string (Str.matched_group 3 input_string) in
-    if CellSet.mem (row-1, col-1) immutable_cells then 
+    if PairSet.mem (row-1, col-1) immutable_cells then 
       let () = clear_line () in get_input immutable_cells
     else 
       let () = clear_line () in
@@ -133,7 +133,7 @@ let print_sudoku_grid grid erroneous_rows erroneous_cols completed_rows complete
       if col mod 3 = 0 then print_string "| ";
       let value = grid.(row).(col) in
       let color = 
-        if CellSet.mem (row,col) immutable_cells then "blue" 
+        if PairSet.mem (row,col) immutable_cells then "blue" 
         else if IntegerSet.mem row erroneous_rows then "red"
         else if IntegerSet.mem col erroneous_cols then "red" 
         else if IntegerSet.mem row completed_rows then "green" 
@@ -167,7 +167,7 @@ let print_sudoku_grid grid erroneous_rows erroneous_cols completed_rows complete
   print_endline "-------------------------";;
 
 (* Runs game *)
-let rec run_game (sudoku_grid : int array array) (immutable_cells : CellSet.t) (grid_solved : bool) (move_count : int) =
+let rec run_game (sudoku_grid : int array array) (immutable_cells : PairSet.t) (grid_solved : bool) (move_count : int) =
   match grid_solved with 
   | true -> print_endline ("Congrats, you won!\nYou solved this sudoku puzzle in " ^ (string_of_int move_count) ^ " moves!\nGreat job! We encourage you to play another exciting game of sudoku.\n");
   | false -> 
