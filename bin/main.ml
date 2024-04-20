@@ -19,7 +19,9 @@ Challenge yourself to solve the sudoku as efficently as possible with a low move
 You'll enter input in the format \'<row> <col> <number>\' to update the board.
 You should enter <row>, <col>, and <number> as digits 1-9.
 The first row is the top row, and the first column is the leftmost column. 
-If there is a formatting error, the game will help you correct it but won't count that move. 
+The cells with blue numbers in them are immutable, as part the initial condition of specifying puzzle of the sudoku board.
+If you try to change the immutable blue cells, the game erase your input it but won't count that as a move. 
+If there is a formatting error, the game erase your input it but won't count that as a move. 
 You can enter \'help\' to recieve helpful formatting tips at any time, which also won't count towards your moves.
 Good luck! You've got this! Happy sudoku-solving!
 ";;
