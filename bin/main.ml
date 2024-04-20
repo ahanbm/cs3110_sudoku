@@ -72,8 +72,6 @@ let rec get_input immutable_cells =
       (row, col, number)
   else let () = clear_line () in get_input immutable_cells
 
-  module IntSet = Set.Make(Int)
-
 (* Function to check each row of the sudoku grid and update their color if necessary *)
 let check_all_rows sudoku_grid =
   let erroneous_rows = ref IntegerSet.empty in
