@@ -90,10 +90,10 @@ let check_all_rows sudoku_grid =
               end
             else
               Hashtbl.add seen value true
-        done
+        done;
+      if Hashtbl.length seen = 9 then completed_rows := IntegerSet.add row !completed_rows
       with Exit -> ()  (* Catching the Exit to exit the inner loop *)
     end; (* End col loop *)
-    if Hashtbl.length seen = 9 then completed_rows := IntegerSet.add row !completed_rows
   done; (* End row loop *)
   (!erroneous_rows, !completed_rows) (* return values *)
 
@@ -115,12 +115,42 @@ let check_all_cols sudoku_grid =
               end
             else
               Hashtbl.add seen value true
-        done
+        done;
+      if Hashtbl.length seen = 9 then completed_cols := IntegerSet.add col !completed_cols
       with Exit -> ()  (* Catching the Exit to exit the inner loop *)
     end; (* End col loop *)
-    if Hashtbl.length seen = 9 then completed_cols := IntegerSet.add col !completed_cols
   done; (* End row loop *)
   (!erroneous_cols, !completed_cols) (* return values *)
+
+(* Function to check each box of the sudoku grid and update their color if necessary *)
+let check_all_boxes sudoku_grid =
+  let erroneous_boxes = ref PairSet.empty in
+  let completed_boxes = ref PairSet.empty in
+  for top_row = 0 to 2 do (* Start top_row loop *)
+    for top_col = 0 to 2 do (* start top_col loop *)
+      let seen = Hashtbl.create 9 in
+      begin
+        let base_row = top_row * 3 in
+        let base_col = top_col * 3 in
+        try 
+          for row = base_row to base_row+2 do
+            for col = base_col to base_col+2 do
+              let value = sudoku_grid.(row).(col) in
+              if Hashtbl.mem seen value then
+                begin
+                  erroneous_boxes := PairSet.add (row,col) !erroneous_boxes;
+                  raise Exit  (* break the col loop using Exit *)
+                end
+              else
+                Hashtbl.add seen value true
+            done;
+          done;
+        if Hashtbl.length seen = 9 then completed_boxes := PairSet.add (top_row,top_col) !completed_boxes
+        with Exit -> ()  (* Catching the Exit to exit the inner loop *)
+      end
+    done; (* start top_col loop *)
+  done; (* End top_row loop *)
+  (!erroneous_boxes, !completed_boxes) (* return values *)
 
 (* This code was written using information from GPT-4 *)
 (* Function to print the sudoku grid *)
