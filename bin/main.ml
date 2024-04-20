@@ -125,8 +125,18 @@ let print_sudoku_grid grid erroneous_rows erroneous_cols completed_rows complete
     for col = 0 to 8 do
       if col mod 3 = 0 then print_string "| ";
       let value = grid.(row).(col) in
-
+      let color = 
+        if CellSet.mem (row,col) immutable_cells then "blue" 
+        else if (IntSet.mem row erroneous_rows || IntSet.mem col erroneous_cols) then "red" 
+        else if (IntSet.mem row completed_rows || IntSet.mem col completed_cols) then "green" 
+        else "none"
+      in
       match color with
+      | "blue" -> (* current value is immutable *)
+          if value = 0 then 
+            Printf.printf "\027[34m. \027[0m"
+          else 
+            Printf.printf "\027[34m%d \027[0m" value
       | "red" -> (* error in the current group *)
           if value = 0 then 
             Printf.printf "\027[31m. \027[0m"
@@ -137,11 +147,6 @@ let print_sudoku_grid grid erroneous_rows erroneous_cols completed_rows complete
             Printf.printf "\027[32m. \027[0m"
           else 
             Printf.printf "\027[32m%d \027[0m" value
-      | "blue" -> (* current value is immutable *)
-          if value = 0 then 
-            Printf.printf "\027[34m. \027[0m"
-          else 
-            Printf.printf "\027[34m%d \027[0m" value
       | _ ->  (* Treat all other colors as "none", but only "none" should be used. *)
           if value = 0 then 
             print_string ". "
@@ -160,7 +165,7 @@ let rec run_game (sudoku_grid : int array array) (immutable_cells : CellSet.t) (
     print_endline ("Sudoku Board | Move " ^ (string_of_int (move_count-1)) ^ " :");
     let (erroneous_rows, completed_rows) = check_all_rows sudoku_grid in 
     let (erroneous_cols, completed_cols) = check_all_rows sudoku_grid in 
-    print_sudoku_grid sudoku_grid completed_rows completed_cols erroneous_rows erroneous_cols immutable_cells;
+    print_sudoku_grid sudoku_grid erroneous_rows erroneous_cols completed_rows completed_cols immutable_cells;
     let (row, col, number) = get_input immutable_cells in
     sudoku_grid.(row-1).(col-1) <- number;
     run_game sudoku_grid immutable_cells (row+col == number) (move_count+1);
