@@ -3,8 +3,6 @@
    dune exec ./bin/main.exe 
   in the terminal *)
 
-  exception Break
-
 let welcome_user = print_endline 
 "
 Welcome to CS3110_sudoku!
@@ -29,13 +27,22 @@ Good luck! You've got this! Happy sudoku-solving!
 ";;
 
 
-(* Type for the set of cells we use to check wether a value can be changed *)
+(* Type for the set of cells we use to check wether a cell's value can be changed *)
 module Cell = struct
   type t = int * int
   let compare = compare
 end
-
 module CellSet = Set.Make(Cell);;
+
+(* Type for the set of ints we use to check wether a row/coll is erroneous *)
+module Integer = struct 
+  type t = int
+  let compare = compare
+end
+module IntegerSet = Set.Make(Integer)
+
+let cardinality_of_int_set set =
+  IntegerSet.fold (fun _ acc -> acc + 1) set 0
 
 (* Initialize the set of cells and grid with one immutable value for testing *)
 let immutable_cells = CellSet.empty;;
@@ -69,8 +76,8 @@ let rec get_input immutable_cells =
 
 (* Function to check each row of the sudoku grid and update their color if necessary *)
 let check_all_rows sudoku_grid =
-  let erroneous_rows = ref IntSet.empty in
-  let completed_rows = ref IntSet.empty in
+  let erroneous_rows = ref IntegerSet.empty in
+  let completed_rows = ref IntegerSet.empty in
   for row = 0 to 8 do (* Start row loop *)
     let seen = Hashtbl.create 9 in
     begin (* Start col loop *)
@@ -80,7 +87,7 @@ let check_all_rows sudoku_grid =
           if value <> 0 then
             if Hashtbl.mem seen value then
               begin
-                erroneous_rows := IntSet.add row !erroneous_rows;
+                erroneous_rows := IntegerSet.add row !erroneous_rows;
                 raise Exit  (* break the col loop using Exit *)
               end
             else
@@ -88,14 +95,14 @@ let check_all_rows sudoku_grid =
         done
       with Exit -> ()  (* Catching the Exit to exit the inner loop *)
     end; (* End col loop *)
-    if Hashtbl.length seen = 9 then completed_rows := IntSet.add row !completed_rows
+    if Hashtbl.length seen = 9 then completed_rows := IntegerSet.add row !completed_rows
   done; (* End row loop *)
   (!erroneous_rows, !completed_rows) (* return values *)
 
 (* Function to check each col of the sudoku grid and update their color if necessary *)
-let check_all_rows sudoku_grid =
-  let erroneous_cols = ref IntSet.empty in
-  let completed_cols = ref IntSet.empty in
+let check_all_cols sudoku_grid =
+  let erroneous_cols = ref IntegerSet.empty in
+  let completed_cols = ref IntegerSet.empty in
   for col = 0 to 8 do (* Start row loop *)
     let seen = Hashtbl.create 9 in
     begin (* Start col loop *)
@@ -105,7 +112,7 @@ let check_all_rows sudoku_grid =
           if value <> 0 then
             if Hashtbl.mem seen value then
               begin
-                erroneous_cols := IntSet.add col !erroneous_cols;
+                erroneous_cols := IntegerSet.add col !erroneous_cols;
                 raise Exit  (* break the col loop using Exit *)
               end
             else
@@ -113,7 +120,7 @@ let check_all_rows sudoku_grid =
         done
       with Exit -> ()  (* Catching the Exit to exit the inner loop *)
     end; (* End col loop *)
-    if Hashtbl.length seen = 9 then completed_cols := IntSet.add col !completed_cols
+    if Hashtbl.length seen = 9 then completed_cols := IntegerSet.add col !completed_cols
   done; (* End row loop *)
   (!erroneous_cols, !completed_cols) (* return values *)
 
@@ -127,8 +134,10 @@ let print_sudoku_grid grid erroneous_rows erroneous_cols completed_rows complete
       let value = grid.(row).(col) in
       let color = 
         if CellSet.mem (row,col) immutable_cells then "blue" 
-        else if (IntSet.mem row erroneous_rows || IntSet.mem col erroneous_cols) then "red" 
-        else if (IntSet.mem row completed_rows || IntSet.mem col completed_cols) then "green" 
+        else if IntegerSet.mem row erroneous_rows then "red"
+        else if IntegerSet.mem col erroneous_cols then "red" 
+        else if IntegerSet.mem row completed_rows then "green" 
+        else if IntegerSet.mem col completed_cols then "green" 
         else "none"
       in
       match color with
@@ -164,11 +173,11 @@ let rec run_game (sudoku_grid : int array array) (immutable_cells : CellSet.t) (
   | false -> 
     print_endline ("Sudoku Board | Move " ^ (string_of_int (move_count-1)) ^ " :");
     let (erroneous_rows, completed_rows) = check_all_rows sudoku_grid in 
-    let (erroneous_cols, completed_cols) = check_all_rows sudoku_grid in 
+    let (erroneous_cols, completed_cols) = check_all_cols sudoku_grid in 
     print_sudoku_grid sudoku_grid erroneous_rows erroneous_cols completed_rows completed_cols immutable_cells;
     let (row, col, number) = get_input immutable_cells in
     sudoku_grid.(row-1).(col-1) <- number;
-    run_game sudoku_grid immutable_cells (row+col == number) (move_count+1);
+    run_game sudoku_grid immutable_cells ((cardinality_of_int_set completed_rows = 9) && (cardinality_of_int_set completed_cols = 9)) (move_count+1);
 
 (* Execute the print function to display the grid *)
 welcome_user;;
