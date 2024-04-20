@@ -177,7 +177,6 @@ let rec run_game (sudoku_grid : int array array) (immutable_cells : PairSet.t) (
     sudoku_grid.(row-1).(col-1) <- number;
     run_game sudoku_grid immutable_cells ((cardinality_of_int_set completed_rows = 9) && (cardinality_of_int_set completed_cols = 9)) (move_count+1);
 
-(* Execute the print function to display the grid *)
 welcome_user;;
 help_user;;
 run_game sudoku_grid immutable_cells false 1;;
