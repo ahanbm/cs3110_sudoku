@@ -223,7 +223,7 @@ let check_all_boxes sudoku_grid =
   done; (* End top_row loop *)
   (!erroneous_boxes, !completed_boxes) (* return values *)
 
-(* This code was written using information from GPT-4 *)
+(* This code was written using information from GPT-4 about ASCII Color regexes, accessed April 20th, 2024 *)
 (* Function to print the sudoku grid *)
 let print_sudoku_grid grid erroneous_rows erroneous_cols erroneous_boxes completed_rows completed_cols completed_boxes immutable_cells =
   for row = 0 to 8 do
