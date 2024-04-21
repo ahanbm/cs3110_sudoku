@@ -52,11 +52,16 @@ let preset_1 =
   let sudoku_grid = Array.make_matrix 9 9 0 in
   let immutable_cells = ref PairSet.empty in
   (* top 3x3 boxes *)
-  sudoku_grid.(0).(0) <- 5; immutable_cells := PairSet.add (0,0) !immutable_cells;
-  sudoku_grid.(0).(1) <- 3; immutable_cells := PairSet.add (0,1) !immutable_cells;
-  sudoku_grid.(0).(4) <- 7; immutable_cells := PairSet.add (0,4) !immutable_cells;
-  sudoku_grid.(1).(0) <- 6; immutable_cells := PairSet.add (1,0) !immutable_cells;
-  sudoku_grid.(1).(3) <- 1; immutable_cells := PairSet.add (1,3) !immutable_cells;
+  sudoku_grid.(0).(0) <- 5; 
+  immutable_cells := PairSet.add (0,0) !immutable_cells;
+  sudoku_grid.(0).(1) <- 3; 
+  immutable_cells := PairSet.add (0,1) !immutable_cells;
+  sudoku_grid.(0).(4) <- 7; 
+  immutable_cells := PairSet.add (0,4) !immutable_cells;
+  sudoku_grid.(1).(0) <- 6; 
+  immutable_cells := PairSet.add (1,0) !immutable_cells;
+  sudoku_grid.(1).(3) <- 1; 
+  immutable_cells := PairSet.add (1,3) !immutable_cells;
   sudoku_grid.(1).(4) <- 9; immutable_cells := PairSet.add (1,4) !immutable_cells;
   sudoku_grid.(1).(5) <- 5; immutable_cells := PairSet.add (1,5) !immutable_cells;
   sudoku_grid.(2).(1) <- 9; immutable_cells := PairSet.add (2,1) !immutable_cells;
