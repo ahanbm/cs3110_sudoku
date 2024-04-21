@@ -45,12 +45,49 @@ module IntegerSet = Set.Make(Integer)
 let cardinality_of_int_set set =
   IntegerSet.fold (fun _ acc -> acc + 1) set 0
 
-(* Initialize the set of cells and grid with one immutable value for testing *)
-let immutable_cells = PairSet.empty;;
-let immutable_cells = PairSet.add (2,2) immutable_cells;;
+(* let preset_empty = (Array.make_matrix 9 9 0, PairSet.empty) *)
 
-let sudoku_grid = Array.make_matrix 9 9 0;;
-sudoku_grid.(2).(2) <- 9;;
+(* This code was written using GPT-4 to automate the tedious task of typing out every cell assignment, accesed April 24th, 2024 *)
+let preset_1 =
+  let sudoku_grid = Array.make_matrix 9 9 0 in
+  let immutable_cells = ref PairSet.empty in
+  (* top 3x3 boxes *)
+  sudoku_grid.(0).(0) <- 5; immutable_cells := PairSet.add (0,0) !immutable_cells;
+  sudoku_grid.(0).(1) <- 3; immutable_cells := PairSet.add (0,1) !immutable_cells;
+  sudoku_grid.(0).(4) <- 7; immutable_cells := PairSet.add (0,4) !immutable_cells;
+  sudoku_grid.(1).(0) <- 6; immutable_cells := PairSet.add (1,0) !immutable_cells;
+  sudoku_grid.(1).(3) <- 1; immutable_cells := PairSet.add (1,3) !immutable_cells;
+  sudoku_grid.(1).(4) <- 9; immutable_cells := PairSet.add (1,4) !immutable_cells;
+  sudoku_grid.(1).(5) <- 5; immutable_cells := PairSet.add (1,5) !immutable_cells;
+  sudoku_grid.(2).(1) <- 9; immutable_cells := PairSet.add (2,1) !immutable_cells;
+  sudoku_grid.(2).(2) <- 8; immutable_cells := PairSet.add (2,2) !immutable_cells;
+  sudoku_grid.(2).(7) <- 6; immutable_cells := PairSet.add (2,7) !immutable_cells;
+  (* middle 3x3 boxes *)
+  sudoku_grid.(3).(0) <- 8; immutable_cells := PairSet.add (3,0) !immutable_cells;
+  sudoku_grid.(3).(4) <- 6; immutable_cells := PairSet.add (3,4) !immutable_cells;
+  sudoku_grid.(3).(8) <- 3; immutable_cells := PairSet.add (3,8) !immutable_cells;
+  sudoku_grid.(4).(0) <- 4; immutable_cells := PairSet.add (4,0) !immutable_cells;
+  sudoku_grid.(4).(3) <- 8; immutable_cells := PairSet.add (4,3) !immutable_cells;
+  sudoku_grid.(4).(5) <- 3; immutable_cells := PairSet.add (4,5) !immutable_cells;
+  sudoku_grid.(4).(8) <- 1; immutable_cells := PairSet.add (4,8) !immutable_cells;
+  sudoku_grid.(5).(0) <- 7; immutable_cells := PairSet.add (5,0) !immutable_cells;
+  sudoku_grid.(5).(4) <- 2; immutable_cells := PairSet.add (5,4) !immutable_cells;
+  sudoku_grid.(5).(8) <- 6; immutable_cells := PairSet.add (5,8) !immutable_cells;
+  (* bottom 3x3 boxes *)
+  sudoku_grid.(6).(1) <- 6; immutable_cells := PairSet.add (6,1) !immutable_cells;
+  sudoku_grid.(6).(6) <- 2; immutable_cells := PairSet.add (6,6) !immutable_cells;
+  sudoku_grid.(6).(7) <- 8; immutable_cells := PairSet.add (6,7) !immutable_cells;
+  sudoku_grid.(7).(3) <- 4; immutable_cells := PairSet.add (7,3) !immutable_cells;
+  sudoku_grid.(7).(4) <- 1; immutable_cells := PairSet.add (7,4) !immutable_cells;
+  sudoku_grid.(7).(5) <- 9; immutable_cells := PairSet.add (7,5) !immutable_cells;
+  sudoku_grid.(7).(8) <- 5; immutable_cells := PairSet.add (7,8) !immutable_cells;
+  sudoku_grid.(8).(4) <- 8; immutable_cells := PairSet.add (8,4) !immutable_cells;
+  sudoku_grid.(8).(7) <- 7; immutable_cells := PairSet.add (8,7) !immutable_cells;
+  sudoku_grid.(8).(8) <- 9; immutable_cells := PairSet.add (8,8) !immutable_cells;
+  (sudoku_grid, !immutable_cells)
+
+(* Initialize the set of cells and grid *)
+let sudoku_grid, immutable_cells = preset_1
 
 (* Clears the current line *)
 let clear_line () =
@@ -212,6 +249,7 @@ let rec run_game (sudoku_grid : int array array) (immutable_cells : PairSet.t) (
     sudoku_grid.(row-1).(col-1) <- number;
     run_game sudoku_grid immutable_cells ((cardinality_of_int_set completed_rows = 9) && (cardinality_of_int_set completed_cols = 9) && (cardinality_of_pair_set completed_boxes = 9)) (move_count+1);
 
+    
 welcome_user;;
 help_user;;
 run_game sudoku_grid immutable_cells false 1;;
