@@ -32,7 +32,9 @@ module Pair = struct
   type t = int * int
   let compare = compare
 end
-module PairSet = Set.Make(Pair);;
+module PairSet = Set.Make(Pair)
+let cardinality_of_pair_set set =
+  PairSet.fold (fun _ acc -> acc + 1) set 0
 
 (* Type for the set of ints we use to check wether a row/coll is erroneous *)
 module Integer = struct 
@@ -40,7 +42,6 @@ module Integer = struct
   let compare = compare
 end
 module IntegerSet = Set.Make(Integer)
-
 let cardinality_of_int_set set =
   IntegerSet.fold (fun _ acc -> acc + 1) set 0
 
@@ -136,13 +137,14 @@ let check_all_boxes sudoku_grid =
           for row = base_row to base_row+2 do
             for col = base_col to base_col+2 do
               let value = sudoku_grid.(row).(col) in
-              if Hashtbl.mem seen value then
-                begin
-                  erroneous_boxes := PairSet.add (row,col) !erroneous_boxes;
-                  raise Exit  (* break the col loop using Exit *)
-                end
-              else
-                Hashtbl.add seen value true
+              if value <> 0 then 
+                if Hashtbl.mem seen value then
+                  begin
+                    erroneous_boxes := PairSet.add (top_row,top_col) !erroneous_boxes;
+                    raise Exit  (* break the col loop using Exit *)
+                  end
+                else
+                  Hashtbl.add seen value true
             done;
           done;
         if Hashtbl.length seen = 9 then completed_boxes := PairSet.add (top_row,top_col) !completed_boxes
@@ -154,7 +156,7 @@ let check_all_boxes sudoku_grid =
 
 (* This code was written using information from GPT-4 *)
 (* Function to print the sudoku grid *)
-let print_sudoku_grid grid erroneous_rows erroneous_cols completed_rows completed_cols immutable_cells =
+let print_sudoku_grid grid erroneous_rows erroneous_cols erroneous_boxes completed_rows completed_cols completed_boxes immutable_cells =
   for row = 0 to 8 do
     if row mod 3 = 0 then print_endline "-------------------------";
     for col = 0 to 8 do
@@ -164,8 +166,10 @@ let print_sudoku_grid grid erroneous_rows erroneous_cols completed_rows complete
         if PairSet.mem (row,col) immutable_cells then "blue" 
         else if IntegerSet.mem row erroneous_rows then "red"
         else if IntegerSet.mem col erroneous_cols then "red" 
+        else if PairSet.mem (row/3, col/3) erroneous_boxes then "red"
         else if IntegerSet.mem row completed_rows then "green" 
         else if IntegerSet.mem col completed_cols then "green" 
+        else if PairSet.mem (row/3, col/3) completed_boxes then "green"
         else "none"
       in
       match color with
@@ -202,10 +206,11 @@ let rec run_game (sudoku_grid : int array array) (immutable_cells : PairSet.t) (
     print_endline ("Sudoku Board | Move " ^ (string_of_int (move_count-1)) ^ " :");
     let (erroneous_rows, completed_rows) = check_all_rows sudoku_grid in 
     let (erroneous_cols, completed_cols) = check_all_cols sudoku_grid in 
-    print_sudoku_grid sudoku_grid erroneous_rows erroneous_cols completed_rows completed_cols immutable_cells;
+    let (erroneous_boxes, completed_boxes) = check_all_boxes sudoku_grid in
+    print_sudoku_grid sudoku_grid erroneous_rows erroneous_cols erroneous_boxes completed_rows completed_cols completed_boxes immutable_cells;
     let (row, col, number) = get_input immutable_cells in
     sudoku_grid.(row-1).(col-1) <- number;
-    run_game sudoku_grid immutable_cells ((cardinality_of_int_set completed_rows = 9) && (cardinality_of_int_set completed_cols = 9)) (move_count+1);
+    run_game sudoku_grid immutable_cells ((cardinality_of_int_set completed_rows = 9) && (cardinality_of_int_set completed_cols = 9) && (cardinality_of_pair_set completed_boxes = 9)) (move_count+1);
 
 welcome_user;;
 help_user;;
