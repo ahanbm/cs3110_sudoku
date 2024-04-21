@@ -19,6 +19,8 @@ Challenge yourself to solve the sudoku as efficently as possible with a low move
 You'll enter input in the format \'<row> <col> <number>\' to update the board.
 You should enter <row>, <col>, and <number> as digits 1-9.
 The first row is the top row, and the first column is the leftmost column. 
+If there is a violation of the sudoku rules present in a row, column, diagonal or 3x3 box, the game will color that row, column, diagonal or 3x3 box red.
+Similarly, if you complete a row, column, or 3x3 box with all numbers 1...9 with no errors, the game will color that row, column, diagonal, or 3x3 box green.
 The cells with blue numbers in them are immutable, as part the initial condition of specifying puzzle of the sudoku board.
 If you try to change the immutable blue cells, the game erase your input it but won't count that as a move. 
 If there is a formatting error, the game erase your input it but won't count that as a move. 
