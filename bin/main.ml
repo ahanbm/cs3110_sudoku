@@ -204,7 +204,6 @@ let check_left_diagonal sudoku_grid =
   done; (* End row and col loop *)
   (!erroneous, (Hashtbl.length seen = 9))
 
-
 (* Function to check the left diagonal of the sudoku grid and update its color if necessary *)
 let check_right_diagonal sudoku_grid =
   let erroneous = ref false in
