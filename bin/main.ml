@@ -3,6 +3,10 @@
    dune exec ./bin/main.exe 
   in the terminal *)
 
+
+
+(* INSTRUCTION PRINTING *)
+
 let welcome_user_d = print_endline 
 "
 Welcome to CS3110_diagonal_sudoku!
@@ -34,6 +38,9 @@ You can enter \'help\' to recieve these formatting tips at any time, which also 
 Good luck! You've got this! Happy sudoku-solving!
 ";;
 
+
+
+(* DATA REPRESENTATION *)
 
 (* Type for the set of pairs of ints we use to check wether a cell's value can be changed *)
 module Pair = struct
@@ -75,11 +82,14 @@ let preset_of_csv filename =
   ) data;
   (sudoku_grid, !immutable_cells)
 
-
 let input_path = "data/initial.txt"
 
 (* Initialize the set of cells and grid *)
 let sudoku_grid, immutable_cells = preset_of_csv input_path
+
+
+
+(* GAME-RUNNING METHODS *)
 
 (* Clears the current line *)
 let clear_line () =
@@ -289,6 +299,9 @@ let rec run_game_d (sudoku_grid : int array array) (immutable_cells : PairSet.t)
     sudoku_grid.(row-1).(col-1) <- number;
     run_game_d sudoku_grid immutable_cells ((cardinality_of_int_set completed_rows = 9) && (cardinality_of_int_set completed_cols = 9) && (cardinality_of_pair_set completed_boxes = 9) && ld_complete && rd_complete) (move_count+1);
    
+
+(* MAIN METHOD *)    
+
 welcome_user_d;;
 help_user_d;;
 run_game_d sudoku_grid immutable_cells false 1;;
