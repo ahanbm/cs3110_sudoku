@@ -53,8 +53,33 @@ module IntegerSet = Set.Make(Integer)
 let cardinality_of_int_set set =
   IntegerSet.fold (fun _ acc -> acc + 1) set 0
 
+
+(* Function to process each cell of the CSV *)
+let preset_of_csv filename =
+  let sudoku_grid = Array.make_matrix 9 9 0 in
+  let immutable_cells = ref PairSet.empty in
+  (* Load the CSV file *)
+  let data = Csv.load filename in
+  (* Iterate over rows with their indices *)
+  List.iteri (fun row_index row ->
+    (* Iterate over columns with their indices *)
+    List.iteri (fun col_index cell ->
+      try
+        let value = int_of_string cell in
+        sudoku_grid.(row_index).(col_index) <- value;
+        if value <> 0 then
+          immutable_cells := PairSet.add (row_index, col_index) !immutable_cells
+      with
+      | Failure _ -> Printf.eprintf "Error at Row: %d, Col: %d, Cell value: %s\n" row_index col_index cell
+    ) row
+  ) data;
+  (sudoku_grid, !immutable_cells)
+
+
+let input_path = "data/initial.txt"
+
 (* Initialize the set of cells and grid *)
-let sudoku_grid, immutable_cells = (Array.make_matrix 9 9 0, PairSet.empty)
+let sudoku_grid, immutable_cells = preset_of_csv input_path
 
 (* Clears the current line *)
 let clear_line () =
