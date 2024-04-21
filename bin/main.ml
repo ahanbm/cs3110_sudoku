@@ -6,15 +6,21 @@
 let welcome_user_d = print_endline 
 "
 Welcome to CS3110_diagonal_sudoku!
-This program allows you can play diagonal sudoku conveniently and easily in your terminal.
-This game comes preloaded with several classic sudoku puzzles.
-You can changing the file \"data/initial.txt\" for a custom puzzle of your choice.
-";;
+This program allows you to play diagonal sudoku conveniently and easily in your terminal.
+
+This game comes preloaded with several classic diagonal sudoku puzzles.
+You can change the file \"data/initial.txt\" for a custom puzzle of your choice.";;
 
 let help_user_d = print_endline
-"The game will prompt you to enter values into the sudoku board whenever you are ready.
+"
+In diagonal sudoku, each row, column, and 3x3 grid must contain the numbers 1-9 with no repeats, in accordance with the standard sudoku rules.
+Further, the two main diagonals (from top left to bottom right and from top right to bottom left) must also contain the numbers 1-9 with no repeats.
+
+The game will prompt you to enter values into the sudoku board whenever you are ready.
+
 The game keeps track of how many times you've entered a value as a 'move count.' 
 Challenge yourself to solve the sudoku as efficently as possible with a low move count!
+
 You'll enter input in the format \'<row> <col> <number>\' to update the board.
 You should enter <row> and <col> as digits 1-9, and <number> as a digit 0-9. <number> being zero means you are clearing your input for that cell.
 The first row is the top row, and the first column is the leftmost column. 
@@ -23,7 +29,8 @@ Similarly, if you complete a row, column, or 3x3 box with all numbers 1...9 with
 The cells with blue numbers in them are immutable, as part the initial condition of specifying puzzle of the sudoku board.
 If you try to change the immutable blue cells, the game erase your input it but won't count that as a move. 
 If there is a formatting error, the game erase your input it but won't count that as a move. 
-You can enter \'help\' to recieve helpful formatting tips at any time, which also won't count towards your moves.
+
+You can enter \'help\' to recieve these formatting tips at any time, which also won't count towards your moves.
 Good luck! You've got this! Happy sudoku-solving!
 ";;
 
