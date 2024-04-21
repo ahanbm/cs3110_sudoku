@@ -12,8 +12,7 @@ You can changing the file \"data/initial.txt\" for a custom puzzle of your choic
 ";;
 
 let help_user = print_endline
-"
-The game will prompt you to enter values into the sudoku board whenever you are ready.
+"The game will prompt you to enter values into the sudoku board whenever you are ready.
 The game keeps track of how many times you've entered a value as a 'move count.' 
 Challenge yourself to solve the sudoku as efficently as possible with a low move count!
 You'll enter input in the format \'<row> <col> <number>\' to update the board.
@@ -49,6 +48,7 @@ let cardinality_of_int_set set =
 
 (* let preset_empty = (Array.make_matrix 9 9 0, PairSet.empty) *)
 
+(* Temporary preset used for testing before we write a csv parser or the like *)
 (* This code was written using GPT-4 to automate the tedious task of typing out every cell assignment, accesed April 24th, 2024 *)
 let preset_1 =
   let sudoku_grid = Array.make_matrix 9 9 0 in
@@ -223,9 +223,52 @@ let check_all_boxes sudoku_grid =
   done; (* End top_row loop *)
   (!erroneous_boxes, !completed_boxes) (* return values *)
 
-(* This code was written using information from GPT-4 about ASCII Color regexes, accessed April 20th, 2024 *)
+(* Function to check the left diagonal of the sudoku grid and update its color if necessary *)
+let check_left_diagonal sudoku_grid =
+  let erroneous = ref false in
+  let seen = Hashtbl.create 9 in
+  for row_and_col = 0 to 8 do (* Start row and col loop *)
+    begin (* Start col loop *)
+      try 
+          let value = sudoku_grid.(row_and_col).(row_and_col) in
+          if value <> 0 then
+            if Hashtbl.mem seen value then
+              begin
+                erroneous := false;
+                raise Exit  (* break the col loop using Exit *)
+              end
+            else
+              Hashtbl.add seen value true;
+      with Exit -> ()  (* Catching the Exit to exit the inner loop *)
+    end;
+  done; (* End row and col loop *)
+  (!erroneous, (Hashtbl.length seen = 9))
+
+
+(* Function to check the left diagonal of the sudoku grid and update its color if necessary *)
+let check_right_diagonal sudoku_grid =
+  let erroneous = ref false in
+  let seen = Hashtbl.create 9 in
+  for row_and_col = 0 to 8 do (* Start row and col loop *)
+    begin (* Start col loop *)
+      try 
+          let value = sudoku_grid.(row_and_col).(8-row_and_col) in
+          if value <> 0 then
+            if Hashtbl.mem seen value then
+              begin
+                erroneous := false;
+                raise Exit  (* break the col loop using Exit *)
+              end
+            else
+              Hashtbl.add seen value true;
+      with Exit -> ()  (* Catching the Exit to exit the inner loop *)
+    end;
+  done; (* End row and col loop *)
+  (!erroneous, (Hashtbl.length seen = 9))
+  
+(* This code was written using information from GPT-4 *)
 (* Function to print the sudoku grid *)
-let print_sudoku_grid grid erroneous_rows erroneous_cols erroneous_boxes completed_rows completed_cols completed_boxes immutable_cells =
+let print_sudoku_grid grid erroneous_rows erroneous_cols erroneous_boxes ld_erroneous rd_erroneous completed_rows completed_cols completed_boxes ld_complete rd_complete immutable_cells =
   for row = 0 to 8 do
     if row mod 3 = 0 then print_endline "-------------------------";
     for col = 0 to 8 do
@@ -236,8 +279,12 @@ let print_sudoku_grid grid erroneous_rows erroneous_cols erroneous_boxes complet
         else if IntegerSet.mem row erroneous_rows then "red"
         else if IntegerSet.mem col erroneous_cols then "red" 
         else if PairSet.mem (row/3, col/3) erroneous_boxes then "red"
+        else if (row = col && ld_erroneous) then "red" 
+        else if (row = 8-col && rd_erroneous) then "red"
         else if IntegerSet.mem row completed_rows then "green" 
         else if IntegerSet.mem col completed_cols then "green" 
+        else if (row = col && ld_complete) then "green" 
+        else if (row = 8-col && rd_complete) then "green"
         else if PairSet.mem (row/3, col/3) completed_boxes then "green"
         else "none"
       in
@@ -276,12 +323,13 @@ let rec run_game (sudoku_grid : int array array) (immutable_cells : PairSet.t) (
     let (erroneous_rows, completed_rows) = check_all_rows sudoku_grid in 
     let (erroneous_cols, completed_cols) = check_all_cols sudoku_grid in 
     let (erroneous_boxes, completed_boxes) = check_all_boxes sudoku_grid in
-    print_sudoku_grid sudoku_grid erroneous_rows erroneous_cols erroneous_boxes completed_rows completed_cols completed_boxes immutable_cells;
+    let (ld_erroneous, ld_complete) = check_left_diagonal sudoku_grid in
+    let (rd_erroneous, rd_complete) = check_right_diagonal sudoku_grid in
+    print_sudoku_grid sudoku_grid erroneous_rows erroneous_cols erroneous_boxes ld_erroneous rd_erroneous completed_rows completed_cols completed_boxes ld_complete rd_complete immutable_cells;
     let (row, col, number) = get_input immutable_cells in
     sudoku_grid.(row-1).(col-1) <- number;
     run_game sudoku_grid immutable_cells ((cardinality_of_int_set completed_rows = 9) && (cardinality_of_int_set completed_cols = 9) && (cardinality_of_pair_set completed_boxes = 9)) (move_count+1);
-
-    
+   
 welcome_user;;
 help_user;;
 run_game sudoku_grid immutable_cells false 1;;
