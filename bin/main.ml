@@ -17,7 +17,7 @@ The game will prompt you to enter values into the sudoku board whenever you are 
 The game keeps track of how many times you've entered a value as a 'move count.' 
 Challenge yourself to solve the sudoku as efficently as possible with a low move count!
 You'll enter input in the format \'<row> <col> <number>\' to update the board.
-You should enter <row>, <col>, and <number> as digits 1-9.
+You should enter <row> and <col> as digits 1-9, and <number> as a digit 0-9. <number> being zero means you are clearing your input for that cell.
 The first row is the top row, and the first column is the leftmost column. 
 If there is a violation of the sudoku rules present in a row, column, diagonal or 3x3 box, the game will color that row, column, diagonal or 3x3 box red.
 Similarly, if you complete a row, column, or 3x3 box with all numbers 1...9 with no errors, the game will color that row, column, diagonal, or 3x3 box green.
@@ -129,7 +129,7 @@ let clear_line () =
 (* Gets input from the user in the desired format and forbids changing of immutable blue cells *)
 let rec get_input immutable_cells = 
   let input_string = read_line () in
-  let regex = Str.regexp "^\\([1-9]\\) \\([1-9]\\) \\([1-9]\\)$" in
+  let regex = Str.regexp "^\\([1-9]\\) \\([1-9]\\) \\([0-9]\\)$" in
   if Str.string_match regex input_string 0 then
     let row = int_of_string (Str.matched_group 1 input_string) in
     let col = int_of_string (Str.matched_group 2 input_string) in
