@@ -53,12 +53,16 @@ let is_solved sudoku_grid input_bool _ =
             = input_bool     
           )
 
-let solved_grid_path = "test_data/solved.csv"
 
-let solved_grid = fst ( preset_of_csv  solved_grid_path )
 let empty_grid = Array.make_matrix 9 9 0
 
 let homogenous_grid = Array.make_matrix 9 9 1
+
+let solved_grid_path = "test_data/solved.csv"
+let solved_grid = fst ( preset_of_csv solved_grid_path )
+
+let solved_excpet_for_last_row_grid_path = "test_data/almost_solved.csv"
+let solved_excpet_for_last_row_grid = fst ( preset_of_csv solved_excpet_for_last_row_grid_path )
 
 let ounit2_tests = "ounit2 test suite" >::: [
 
@@ -78,7 +82,12 @@ let ounit2_tests = "ounit2 test suite" >::: [
   "A solved grid should have 0 erroneous boxes and 9 completed boxes" >:: grid_boxes_test solved_grid 0 9;
   "A solved grid should have no erroneous diagonals and both diagonals completed" >:: grid_left_then_right_diagonals_test solved_grid false true false true;
   "A homogenous grid should  be flagged as solved by the logic in run_game" >:: is_solved solved_grid true;
-  
+
+  "An almost-solved-with-empty-last-row-grid should have no erroneous rows, 8 completed rows, no erroneous cols, and no completed cols" >:: grid_rows_then_cols_test solved_excpet_for_last_row_grid 0 8 0 0;
+  "An almost-solved-with-empty-last-row-grid should have 0 erroneous boxes and 6 completed boxes" >:: grid_boxes_test solved_excpet_for_last_row_grid 0 6;
+  "An almost-solved-with-empty-last-row-grid grid should have no erroneous diagonals and both diagonals completed" >:: grid_left_then_right_diagonals_test solved_excpet_for_last_row_grid false false false false;
+  "An almost-solved-with-empty-last-row-grid should not be flagged as solved by the logic in run_game" >:: is_solved solved_excpet_for_last_row_grid false;
+
 ]
 
 (* RUN TESTS *)
