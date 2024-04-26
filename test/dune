@@ -1,5 +1,9 @@
 (test
  (name test_cs3110_sudoku)
  (libraries ounit2 diagonal_sudoku)
- (deps test_data/solved.csv test_data/almost_solved.csv)
+ (deps 
+  test_data/solved.csv 
+  test_data/almost_solved_missing_row.csv
+  test_data/almost_solved_missing_topleft_cell.csv
+  )
 )

@@ -61,8 +61,11 @@ let homogenous_grid = Array.make_matrix 9 9 1
 let solved_grid_path = "test_data/solved.csv"
 let solved_grid = fst ( preset_of_csv solved_grid_path )
 
-let solved_excpet_for_last_row_grid_path = "test_data/almost_solved.csv"
+let solved_excpet_for_last_row_grid_path = "test_data/almost_solved_missing_row.csv"
 let solved_excpet_for_last_row_grid = fst ( preset_of_csv solved_excpet_for_last_row_grid_path )
+
+let solved_except_for_topleft_cell_path = "test_data/almost_solved_missing_topleft_cell.csv"
+let solved_except_for_topleft_cell = fst ( preset_of_csv solved_except_for_topleft_cell_path )
 
 let ounit2_tests = "ounit2 test suite" >::: [
 
@@ -87,6 +90,11 @@ let ounit2_tests = "ounit2 test suite" >::: [
   "An almost-solved-with-empty-last-row-grid should have 0 erroneous boxes and 6 completed boxes" >:: grid_boxes_test solved_excpet_for_last_row_grid 0 6;
   "An almost-solved-with-empty-last-row-grid grid should have no erroneous diagonals and both diagonals completed" >:: grid_left_then_right_diagonals_test solved_excpet_for_last_row_grid false false false false;
   "An almost-solved-with-empty-last-row-grid should not be flagged as solved by the logic in run_game" >:: is_solved solved_excpet_for_last_row_grid false;
+
+  "An almost-solved-with-empty-topleft-cell-grid should have 0 erroneous rows, 8 completed rows, 0 erroneous cols, and 8 completed cols" >:: grid_rows_then_cols_test solved_except_for_topleft_cell 0 8 0 8;
+  "An almost-solved-with-empty-topleft-cell-grid should have 0 erroneous boxes and 8 completed boxes" >:: grid_boxes_test solved_except_for_topleft_cell 0 8;
+  "An almost-solved-with-empty-topleft-cell-grid grid should have no erroneous diagonals and only the right diagonal completed" >:: grid_left_then_right_diagonals_test solved_except_for_topleft_cell false false false true;
+  "An almost-solved-with-empty-topleft-cell-grid should not be flagged as solved by the logic in run_game" >:: is_solved solved_except_for_topleft_cell false;
 
 ]
 
