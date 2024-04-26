@@ -5,6 +5,17 @@
 
 open Diagonal_sudoku
 
+let welcome_user_d_path = "data/private/welcome_user_d.txt"
+let welcome_user_d =
+  let lines = read_lines welcome_user_d_path in
+  print_string_list lines
+
+
+let help_user_d_path = "data/private/help_user_d.txt"
+let help_user_d =
+  let lines = read_lines help_user_d_path in
+  print_string_list lines
+
 let input_path = "data/initial.csv"
 
 (* Initialize the set of cells and grid *)

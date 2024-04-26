@@ -1,2 +1,5 @@
 (test
- (name test_cs3110_sudoku))
+ (name test_cs3110_sudoku)
+ (libraries ounit2 diagonal_sudoku)
+ (deps (source_tree ../data))
+)

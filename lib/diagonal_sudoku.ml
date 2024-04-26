@@ -15,19 +15,7 @@ let read_lines filename =
 
 (* Print each line from a list of strings *)
 let print_string_list lst =
-  List.iter print_endline lst
-
-let welcome_user_d_path = "data/private/welcome_user_d.txt"
-let welcome_user_d =
-  let lines = read_lines welcome_user_d_path in
-  print_string_list lines
-
-
-let help_user_d_path = "data/private/help_user_d.txt"
-let help_user_d =
-  let lines = read_lines help_user_d_path in
-  print_string_list lines
-  
+  List.iter print_endline lst  
 
 (* DATA REPRESENTATION *)
 
