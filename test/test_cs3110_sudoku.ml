@@ -35,6 +35,23 @@ let grid_left_then_right_diagonals_test sudoku_grid ld_e_expected ld_c_expected 
     && rd_erroneous = rd_e_expected
   )
 
+(* Note: this function is implemented in here mirroring the logic in run_game because using a function like this
+    in run_game's implementation, each of check_all_rows, check_all_cols, check_all_boxes, etc. would be computed
+    twice, reducing efficiency. *)
+let is_solved sudoku_grid input_bool _ =
+  let _, completed_rows = check_all_rows sudoku_grid in
+  let _, completed_cols = check_all_cols sudoku_grid in
+  let _, completed_boxes = check_all_boxes sudoku_grid in
+  let _, ld_complete = check_left_diagonal sudoku_grid in
+  let _, rd_complete = check_right_diagonal sudoku_grid in  
+  assert ( 
+          (cardinality_of_int_set completed_rows = 9
+            && cardinality_of_int_set completed_cols = 9
+            && cardinality_of_pair_set completed_boxes = 9
+            && ld_complete 
+            && rd_complete) 
+            = input_bool     
+          )
 
 let solved_grid_path = "test_data/solved.csv"
 
@@ -50,15 +67,18 @@ let ounit2_tests = "ounit2 test suite" >::: [
   "An empty grid should have no erroneous rows, no completed rows, no erroneous cols, and no completed cols" >:: grid_rows_then_cols_test empty_grid 0 0 0 0;
   "An empty grid should have no erroneous boxes and no completed boxes" >:: grid_boxes_test empty_grid 0 0;
   "An empty grid should have no erroneous diagonals and no completed diagonals" >:: grid_left_then_right_diagonals_test empty_grid false false false false;
+  "An empty grid should not be flagged as solved by the logic in run_game" >:: is_solved empty_grid false;
 
-  "An homogenous grid should have 9 erroneous rows, no completed rows, 9 erroneous cols, and no completed cols" >:: grid_rows_then_cols_test homogenous_grid 9 0 9 0;
-  "An homogenous grid should have 9 erroneous boxes and no completed boxes" >:: grid_boxes_test homogenous_grid 9 0;
-  "An homogenous grid should have both diagonals erroneous and no completed diagonals" >:: grid_left_then_right_diagonals_test homogenous_grid true false true false;
+  "A homogenous grid should have 9 erroneous rows, no completed rows, 9 erroneous cols, and no completed cols" >:: grid_rows_then_cols_test homogenous_grid 9 0 9 0;
+  "A homogenous grid should have 9 erroneous boxes and no completed boxes" >:: grid_boxes_test homogenous_grid 9 0;
+  "A homogenous grid should have both diagonals erroneous and no completed diagonals" >:: grid_left_then_right_diagonals_test homogenous_grid true false true false;
+  "A homogenous grid should not be flagged as solved by the logic in run_game" >:: is_solved homogenous_grid false;
 
   "A solved grid should have no erroneous rows, 9 completed rows, no erroneous cols, and 9 completed cols" >:: grid_rows_then_cols_test solved_grid 0 9 0 9;
   "A solved grid should have 0 erroneous boxes and 9 completed boxes" >:: grid_boxes_test solved_grid 0 9;
   "A solved grid should have no erroneous diagonals and both diagonals completed" >:: grid_left_then_right_diagonals_test solved_grid false true false true;
-
+  "A homogenous grid should  be flagged as solved by the logic in run_game" >:: is_solved solved_grid true;
+  
 ]
 
 (* RUN TESTS *)

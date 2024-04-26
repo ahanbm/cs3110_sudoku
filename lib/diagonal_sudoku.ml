@@ -314,10 +314,13 @@ let rec run_game_d
         immutable_cells;
       let row, col, number = get_input immutable_cells in
       sudoku_grid.(row - 1).(col - 1) <- number;
-      run_game_d sudoku_grid immutable_cells
+      run_game_d 
+        sudoku_grid 
+        immutable_cells
         (cardinality_of_int_set completed_rows = 9
         && cardinality_of_int_set completed_cols = 9
         && cardinality_of_pair_set completed_boxes = 9
-        && ld_complete && rd_complete)
+        && ld_complete 
+        && rd_complete)
         (move_count + 1);
       
