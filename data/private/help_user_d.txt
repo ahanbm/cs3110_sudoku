@@ -1,0 +1,21 @@
+
+In diagonal sudoku, each row, column, and 3x3 grid must contain the numbers 1-9 with no repeats, in accordance with the standard sudoku rules.
+Further, the two main diagonals (from top left to bottom right and from top right to bottom left) must also contain the numbers 1-9 with no repeats.
+
+The game will prompt you to enter values into the sudoku board whenever you are ready.
+
+The game keeps track of how many times you've entered a value as a 'move count.' 
+Challenge yourself to solve the sudoku as efficiently as possible with a low move count!
+
+You'll enter input in the format '<row> <col> <number>' to update the board.
+You should enter <row> and <col> as digits 1-9, and <number> as a digit 0-9. <number> being zero means you are clearing your input for that cell.
+The first row is the top row, and the first column is the leftmost column. 
+If there is a violation of the sudoku rules present in a row, column, diagonal or 3x3 box, the game will color that row, column, diagonal or 3x3 box red.
+Similarly, if you complete a row, column, or 3x3 box with all numbers 1...9 with no errors, the game will color that row, column, diagonal, or 3x3 box green.
+The cells with blue numbers in them are immutable, as part the initial condition of specifying puzzle of the sudoku board.
+If you try to change the immutable blue cells, the game erase your input it but won't count that as a move. 
+If there is a formatting error, the game erase your input it but won't count that as a move. 
+
+You can enter 'help' to receive these formatting tips at any time, which also won't count towards your moves.
+Good luck! You've got this! Happy sudoku-solving!
+

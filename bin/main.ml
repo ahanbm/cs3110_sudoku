@@ -5,9 +5,11 @@
 
 open Diagonal_sudoku
 
-let input_path = "data/initial.txt"
+let input_path = "data/initial.csv"
 
 (* Initialize the set of cells and grid *)
 let sudoku_grid, immutable_cells = preset_of_csv input_path
 
+let () = welcome_user_d 
+let () = help_user_d
 let () = run_game_d sudoku_grid immutable_cells false 1

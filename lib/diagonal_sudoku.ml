@@ -1,48 +1,33 @@
+(* UI/PRINTING METHODS *)
 
+(* Function to read lines from a file into a list *)
+let read_lines filename =
+  let in_channel = open_in filename in
+  let rec read_lines_helper acc =
+    try
+      let line = input_line in_channel in
+      read_lines_helper (line :: acc)
+    with End_of_file ->
+      close_in in_channel;
+      List.rev acc
+  in
+  read_lines_helper []
+
+(* Print each line from a list of strings *)
+let print_string_list lst =
+  List.iter print_endline lst
+
+let welcome_user_d_path = "data/private/welcome_user_d.txt"
 let welcome_user_d =
-  print_endline
-    "\n\
-     Welcome to CS3110_diagonal_sudoku!\n\
-     This program allows you to play diagonal sudoku conveniently and easily \
-     in your terminal.\n\n\
-     This game comes preloaded with several classic diagonal sudoku puzzles.\n\
-     You can change the file \"data/initial.txt\" for a custom puzzle of your \
-     choice."
+  let lines = read_lines welcome_user_d_path in
+  print_string_list lines
 
+
+let help_user_d_path = "data/private/help_user_d.txt"
 let help_user_d =
-  print_endline
-    "\n\
-     In diagonal sudoku, each row, column, and 3x3 grid must contain the \
-     numbers 1-9 with no repeats, in accordance with the standard sudoku rules.\n\
-     Further, the two main diagonals (from top left to bottom right and from \
-     top right to bottom left) must also contain the numbers 1-9 with no \
-     repeats.\n\n\
-     The game will prompt you to enter values into the sudoku board whenever \
-     you are ready.\n\n\
-     The game keeps track of how many times you've entered a value as a 'move \
-     count.' \n\
-     Challenge yourself to solve the sudoku as efficently as possible with a \
-     low move count!\n\n\
-     You'll enter input in the format \'<row> <col> <number>\' to update the \
-     board.\n\
-     You should enter <row> and <col> as digits 1-9, and <number> as a digit \
-     0-9. <number> being zero means you are clearing your input for that cell.\n\
-     The first row is the top row, and the first column is the leftmost column. \n\
-     If there is a violation of the sudoku rules present in a row, column, \
-     diagonal or 3x3 box, the game will color that row, column, diagonal or \
-     3x3 box red.\n\
-     Similarly, if you complete a row, column, or 3x3 box with all numbers \
-     1...9 with no errors, the game will color that row, column, diagonal, or \
-     3x3 box green.\n\
-     The cells with blue numbers in them are immutable, as part the initial \
-     condition of specifying puzzle of the sudoku board.\n\
-     If you try to change the immutable blue cells, the game erase your input \
-     it but won't count that as a move. \n\
-     If there is a formatting error, the game erase your input it but won't \
-     count that as a move. \n\n\
-     You can enter \'help\' to recieve these formatting tips at any time, \
-     which also won't count towards your moves.\n\
-     Good luck! You've got this! Happy sudoku-solving!\n"
+  let lines = read_lines help_user_d_path in
+  print_string_list lines
+  
 
 (* DATA REPRESENTATION *)
 
@@ -326,9 +311,19 @@ let rec run_game_d
       let erroneous_boxes, completed_boxes = check_all_boxes sudoku_grid in
       let ld_erroneous, ld_complete = check_left_diagonal sudoku_grid in
       let rd_erroneous, rd_complete = check_right_diagonal sudoku_grid in
-      print_sudoku_grid_d sudoku_grid erroneous_rows erroneous_cols
-        erroneous_boxes ld_erroneous rd_erroneous completed_rows completed_cols
-        completed_boxes ld_complete rd_complete immutable_cells;
+      print_sudoku_grid_d 
+        sudoku_grid 
+        erroneous_rows 
+        erroneous_cols
+        erroneous_boxes 
+        ld_erroneous 
+        rd_erroneous 
+        completed_rows 
+        completed_cols
+        completed_boxes 
+        ld_complete 
+        rd_complete 
+        immutable_cells;
       let row, col, number = get_input immutable_cells in
       sudoku_grid.(row - 1).(col - 1) <- number;
       run_game_d sudoku_grid immutable_cells
@@ -337,7 +332,4 @@ let rec run_game_d
         && cardinality_of_pair_set completed_boxes = 9
         && ld_complete && rd_complete)
         (move_count + 1);
-
-      (* MAIN METHOD *)
-      welcome_user_d;
-      help_user_d;;
+      
