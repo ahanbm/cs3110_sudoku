@@ -8,41 +8,57 @@ open Diagonal_sudoku
 
 let trivial_test _ = assert (0 = 0)
 
-let empty_grid_rows_and_cols_test _ =
-  let sudoku_grid = Array.make_matrix 9 9 0 in
+let grid_rows_then_cols_test sudoku_grid erroneous_rows_count completed_rows_count erroneous_cols_count completed_cols_count _ =
   let erroneous_rows, completed_rows = check_all_rows sudoku_grid in
   let erroneous_cols, completed_cols = check_all_cols sudoku_grid in
   assert (
-    cardinality_of_int_set erroneous_rows = 0 
-    && cardinality_of_int_set completed_rows = 0
-    && cardinality_of_int_set erroneous_cols = 0
-    && cardinality_of_int_set completed_cols = 0
+    cardinality_of_int_set erroneous_rows = erroneous_rows_count 
+    && cardinality_of_int_set completed_rows = completed_rows_count
+    && cardinality_of_int_set erroneous_cols = erroneous_cols_count
+    && cardinality_of_int_set completed_cols = completed_cols_count
   )
 
-let empty_grid_boxes_test _ =
-  let sudoku_grid = Array.make_matrix 9 9 0 in
+let grid_boxes_test sudoku_grid erroneous_boxes_count completed_boxes_count _ =
   let erroneous_boxes, completed_boxes = check_all_boxes sudoku_grid in
   assert (
-    cardinality_of_pair_set erroneous_boxes = 0 
-    && cardinality_of_pair_set completed_boxes = 0
+    cardinality_of_pair_set erroneous_boxes = erroneous_boxes_count
+    && cardinality_of_pair_set completed_boxes = completed_boxes_count
   )
 
-let empty_grid_diagonals_test _ =
-  let sudoku_grid = Array.make_matrix 9 9 0 in
+let grid_left_then_right_diagonals_test sudoku_grid ld_e_expected ld_c_expected rd_e_expected rd_c_expected _ =
   let ld_erroneous, ld_complete = check_left_diagonal sudoku_grid in
   let rd_erroneous, rd_complete = check_right_diagonal sudoku_grid in
   assert (
-    not ld_complete  
-    && not ld_erroneous
-    && not rd_complete
-    && not rd_erroneous
+    ld_complete = ld_c_expected
+    && ld_erroneous = ld_e_expected
+    && rd_complete = rd_c_expected
+    && rd_erroneous = rd_e_expected
   )
 
+
+let solved_grid_path = "test_data/solved.csv"
+
+let solved_grid = fst ( preset_of_csv  solved_grid_path )
+let empty_grid = Array.make_matrix 9 9 0
+
+let homogenous_grid = Array.make_matrix 9 9 1
+
 let ounit2_tests = "ounit2 test suite" >::: [
+
   "a trivial test" >:: trivial_test;
-  "An empty grid should have no erroneous rows and no completed rows" >:: empty_grid_rows_and_cols_test;
-  "An empty grid should have no erroneous boxes and no completed boxes" >:: empty_grid_boxes_test;
-  "An empty grid should have no erroneous diagonals and no completed diagonals" >:: empty_grid_diagonals_test;
+
+  "An empty grid should have no erroneous rows, no completed rows, no erroneous cols, and no completed cols" >:: grid_rows_then_cols_test empty_grid 0 0 0 0;
+  "An empty grid should have no erroneous boxes and no completed boxes" >:: grid_boxes_test empty_grid 0 0;
+  "An empty grid should have no erroneous diagonals and no completed diagonals" >:: grid_left_then_right_diagonals_test empty_grid false false false false;
+
+  "An homogenous grid should have 9 erroneous rows, no completed rows, 9 erroneous cols, and no completed cols" >:: grid_rows_then_cols_test homogenous_grid 9 0 9 0;
+  "An homogenous grid should have 9 erroneous boxes and no completed boxes" >:: grid_boxes_test homogenous_grid 9 0;
+  "An homogenous grid should have both diagonals erroneous and no completed diagonals" >:: grid_left_then_right_diagonals_test homogenous_grid true false true false;
+
+  "A solved grid should have no erroneous rows, 9 completed rows, no erroneous cols, and 9 completed cols" >:: grid_rows_then_cols_test solved_grid 0 9 0 9;
+  "A solved grid should have 0 erroneous boxes and 9 completed boxes" >:: grid_boxes_test solved_grid 0 9;
+  "A solved grid should have no erroneous diagonals and both diagonals completed" >:: grid_left_then_right_diagonals_test solved_grid false true false true;
+
 ]
 
 (* RUN TESTS *)

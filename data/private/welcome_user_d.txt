@@ -4,5 +4,5 @@ This program allows you to play diagonal sudoku conveniently and easily in your 
 
 This game comes preloaded with several classic diagonal sudoku puzzles.
 You can change the file "data/initial.csv" for a custom puzzle of your choice.
-As you do this, do not change any of the files in the directories "data/private", as those 
+As you do this, do not change any of the files in the directories "data/private" or "data/test", as those 
 are crucial to the game's internal functionality and should not be changed. 
