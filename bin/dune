@@ -1,4 +1,4 @@
 (executable
  (public_name cs3110_sudoku)
  (name main)
- (libraries diagonal_sudoku))
+ (libraries cs3110_sudoku))

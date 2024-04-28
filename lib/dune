@@ -1,5 +1,5 @@
 (library
- (name diagonal_sudoku)
- (modules diagonal_sudoku)
- (libraries csv str)
-)
+ (name cs3110_sudoku)
+ (public_name cs3110_sudoku)
+ (modules diagonal_sudoku connect_four)
+ (libraries csv str))
