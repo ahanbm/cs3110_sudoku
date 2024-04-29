@@ -5,6 +5,12 @@ type player =
   | Red
   | Yellow
 
+let string_of_player = function
+  | Some Red -> "Red"
+  | Some Yellow -> "Yellow"
+  | None -> "_"
+
+(* Type definition for the board *)
 type board = player option array array
 
 (* Function to initialize an empty board *)
@@ -53,7 +59,8 @@ let is_column_full (col : player option array) : bool =
 (* Function to drop a token into a column *)
 let drop_token (player : player) (board : board) (column_number : int) : bool =
   let rec find_empty_index col idx =
-    if idx >= 0 && idx < Array.length col && col.(idx) = None then idx
+    if idx < 0 then -1
+    else if idx < Array.length col && col.(idx) = None then idx
     else find_empty_index col (idx - 1)
   in
   let empty_index =
@@ -91,51 +98,62 @@ let check_winner (board : board) (player : player) : bool =
   let rec check_consecutive count = function
     | [] -> count >= 4
     | h :: t ->
-        if h = Some player then check_consecutive (count + 1) t
+        if count >= 4 then true
+        else if h = Some player then check_consecutive (count + 1) t
         else check_consecutive 0 t
   in
 
-  (* Helper function to check for four consecutive tokens in a row *)
+  (* Helper function to check for four consecutive tokens in a column *)
   let check_rows () =
+    let transpose_board = transpose board in
     Array.exists
       (fun col ->
         let row = Array.to_list col in
         check_consecutive 0 row)
-      board
+      transpose_board
   in
 
-  (* Helper function to check for four consecutive tokens in a column *)
+  (* Helper function to check for four consecutive tokens in a row *)
   let check_columns () =
-    let cols =
-      Array.init
-        (Array.length board.(0))
-        (fun i -> Array.map (fun row -> row.(i)) board)
-    in
-    let check_rows_transposed cols =
-      Array.exists
-        (fun col ->
-          let row = Array.to_list col in
-          check_consecutive 0 row)
-        cols
-    in
-    check_rows_transposed cols
+    Array.exists
+      (fun col ->
+        let row = Array.to_list col in
+        check_consecutive 1 row)
+      board
   in
 
   (* Helper function to check for four consecutive tokens in diagonals *)
   let check_diagonals () =
-    let rec diagonal_elements i j acc =
-      if i < 0 || j < 0 || i >= width || j >= height then acc
-      else diagonal_elements (i + 1) (j + 1) (board.(i).(j) :: acc)
+    let rec up_diag i j acc =
+      if i >= width || j >= height then acc
+      else up_diag (i + 1) (j + 1) (board.(i).(j) :: acc)
     in
-    let diagonals_from i j = diagonal_elements i j [] in
-    let diagonals =
-      List.init
-        (width + height - 1)
-        (fun i ->
-          let j = if i < width then 0 else i - width + 1 in
-          diagonals_from i j)
+    let rec down_diag i j acc =
+      if i >= width || j < 0 then acc
+      else down_diag (i + 1) (j - 1) (board.(i).(j) :: acc)
     in
-    List.exists (check_consecutive 0) diagonals
+    let up_diagonals =
+      let rec generate_ups i j acc =
+        if j < height then begin
+          if i < width then generate_ups (i + 1) j (up_diag i j [] :: acc)
+          else generate_ups 0 (j + 1) acc
+        end
+        else acc
+      in
+      generate_ups 0 0 []
+    in
+    let down_diagonals =
+      let rec generate_downs i j acc =
+        if j < height then begin
+          if i < width then generate_downs (i + 1) j (down_diag i j [] :: acc)
+          else generate_downs 0 (j + 1) acc
+        end
+        else acc
+      in
+      generate_downs 0 0 []
+    in
+    List.exists (fun diagonal -> check_consecutive 0 diagonal) up_diagonals
+    || List.exists (fun diagonal -> check_consecutive 0 diagonal) down_diagonals
   in
 
   (* Check rows, columns, and diagonals *)
@@ -155,12 +173,19 @@ let rec make_move (board : board) (player : player) : unit =
   else ()
 
 let rec play_game board player =
-  if is_board_full board then print_endline "It's a draw!"
+  if is_board_full board then (
+    print_board board;
+    print_endline "It's a draw!")
   else begin
     let () = make_move board player in
-    print_board board;
     if check_winner board player then
-      print_endline (if player = Red then "Red wins!" else "Yellow wins!")
+      print_endline
+        (if player = Red then (
+           print_board board;
+           "Red wins!")
+         else (
+           print_board board;
+           "Yellow wins!"))
     else play_game board (if player = Red then Yellow else Red)
   end
 

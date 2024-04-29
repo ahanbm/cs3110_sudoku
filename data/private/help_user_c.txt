@@ -15,9 +15,7 @@ Move Count:
 Game Rules and Feedback:
   If a player successfully connects four discs in a row, column, or diagonal, they win the game.
   If the grid is filled without a winner, the game ends in a draw.
-  The game indicates the winning move and the player who wins.
+  The game will indicate who wins if it senses a victory.
   If a column is full, attempting to drop a disc in that column will prompt you to choose another column.
-  Formatting errors won't count towards your moves.
-  You can enter 'help' at any time for formatting tips, which also won't count towards your moves.
 
 Enjoy the game and good luck!
