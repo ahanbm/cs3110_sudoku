@@ -1,0 +1,4 @@
+
+Welcome to CS3110_Connect4!
+This program allows you to play Connect 4 conveniently and easily in your terminal.
+This game supports playing between two human players, with red and yellow colors.

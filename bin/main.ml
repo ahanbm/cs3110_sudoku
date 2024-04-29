@@ -5,7 +5,22 @@ open Cs3110_sudoku
 include Diagonal_sudoku
 include Connect_four
 
-let connect4 () = print_endline "Welcome to Connect 4!"
+let connect4 () =
+  let welcome_user_c_path = "data/private/welcome_user_c.txt" in
+  let welcome_user_c =
+    let lines = read_lines welcome_user_c_path in
+    print_string_list lines
+  in
+
+  let help_user_c_path = "data/private/help_user_c.txt" in
+  let help_user_c =
+    let lines = read_lines help_user_c_path in
+    print_string_list lines
+  in
+
+  let () = welcome_user_c in
+  let () = help_user_c in
+  connect_four ()
 
 let sudoku () =
   let welcome_user_d_path = "data/private/welcome_user_d.txt" in
