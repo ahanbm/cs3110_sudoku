@@ -132,26 +132,15 @@ let check_winner (board : board) (player : player) : bool =
       if i >= width || j < 0 then acc
       else down_diag (i + 1) (j - 1) (board.(i).(j) :: acc)
     in
-    let up_diagonals =
-      let rec generate_ups i j acc =
-        if j < height then begin
-          if i < width then generate_ups (i + 1) j (up_diag i j [] :: acc)
-          else generate_ups 0 (j + 1) acc
-        end
-        else acc
-      in
-      generate_ups 0 0 []
+    let rec generate func i j acc =
+      if j < height then begin
+        if i < width then generate func (i + 1) j (func i j [] :: acc)
+        else generate func 0 (j + 1) acc
+      end
+      else acc
     in
-    let down_diagonals =
-      let rec generate_downs i j acc =
-        if j < height then begin
-          if i < width then generate_downs (i + 1) j (down_diag i j [] :: acc)
-          else generate_downs 0 (j + 1) acc
-        end
-        else acc
-      in
-      generate_downs 0 0 []
-    in
+    let up_diagonals = generate up_diag 0 0 [] in
+    let down_diagonals = generate down_diag 0 0 [] in
     List.exists (fun diagonal -> check_consecutive 0 diagonal) up_diagonals
     || List.exists (fun diagonal -> check_consecutive 0 diagonal) down_diagonals
   in
