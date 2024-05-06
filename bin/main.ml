@@ -4,6 +4,7 @@
 open Cs3110_sudoku
 include Diagonal_sudoku
 
+(** Initializes printing functions for sudoku *)
 let initialize () =
   let welcome_user_d_path = "data/private/welcome_user_d.txt" in
   let welcome_user_d () =
@@ -19,6 +20,7 @@ let initialize () =
 
   (welcome_user_d, help_user_d)
 
+(** Starts the sudoku game *)
 let sudoku () =
   let welcome_user_d, help_user_d = initialize () in
   let input_path = "data/initial.csv" in
@@ -28,7 +30,11 @@ let sudoku () =
 
   let () = welcome_user_d () in
   let () = help_user_d () in
-  let () = run_game_d sudoku_grid immutable_cells false 1 in
+  let start_time = Unix.gettimeofday () in
+  let () =
+    run_game_d sudoku_grid immutable_cells false 1 start_time
+      (Statistics.reset_statistics ())
+  in
   ()
 
 let () = sudoku ()

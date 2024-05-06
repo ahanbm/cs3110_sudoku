@@ -1,3 +1,4 @@
+open Statistics
 (** UI/PRINTING METHODS **)
 
 val read_lines : string -> string list
@@ -79,8 +80,9 @@ val print_sudoku_grid_d :
   unit
 (** Function to print the sudoku grid *)
 
-val run_game_d : int array array -> PairSet.t -> bool -> int -> unit
+val run_game_d :
+  int array array -> PairSet.t -> bool -> int -> float -> statistics -> unit
 (** Runs the game *)
 
 (** Open AI. "Write the mli file for this code - Chat Conversation". Chat GPT.
-    April 2024 *)
+    May 2024 *)

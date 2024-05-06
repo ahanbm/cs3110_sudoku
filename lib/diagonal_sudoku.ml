@@ -1,3 +1,5 @@
+include Statistics
+
 let read_lines filename =
   let in_channel = open_in filename in
   let rec read_lines_helper acc =
@@ -241,17 +243,68 @@ let print_sudoku_grid_d grid erroneous_rows erroneous_cols erroneous_boxes
   done;
   print_endline "-------------------------"
 
-let rec run_game_d (sudoku_grid : int array array) (immutable_cells : PairSet.t)
-    (grid_solved : bool) (move_count : int) =
+(* Function to check if a move is valid in a Sudoku grid *)
+let is_valid_move sudoku_grid row col number =
+  (* Check if the number is already present in the same row *)
+  let row_valid =
+    not (Array.exists (fun value -> value = number) sudoku_grid.(row))
+  in
+  (* Check if the number is already present in the same column *)
+  let col_valid =
+    not (Array.exists (fun row_array -> row_array.(col) = number) sudoku_grid)
+  in
+  (* Check if the number is already present in the same 3x3 box *)
+  let box_valid =
+    let top_row = row / 3 * 3 in
+    let top_col = col / 3 * 3 in
+    let rec check_box r c =
+      if r = top_row + 3 then true
+      else if c = top_col + 3 then check_box (r + 1) top_col
+      else if sudoku_grid.(r).(c) <> number then check_box r (c + 1)
+      else false
+    in
+    check_box top_row top_col
+  in
+  row_valid && col_valid && box_valid
+
+(* Function to find a valid move for the next cell *)
+let rec find_valid_move sudoku_grid row col =
+  if row = 9 then None (* Reached end of grid, no valid move found *)
+  else if sudoku_grid.(row).(col) = 0 then
+    (* Cell is empty, check if any valid move exists *)
+    let rec find_valid_number number =
+      if number > 9 then None (* No valid number found *)
+      else if is_valid_move sudoku_grid row col number then
+        Some (row, col, number) (* Found a valid move *)
+      else find_valid_number (number + 1)
+    in
+    find_valid_number 1
+  else if col = 8 then find_valid_move sudoku_grid (row + 1) 0
+  else find_valid_move sudoku_grid row (col + 1)
+
+(* Function to provide a hint to the user *)
+let hint sudoku_grid =
+  match find_valid_move sudoku_grid 0 0 with
+  | None -> print_endline "No valid moves available."
+  | Some (row, col, number) ->
+      Printf.printf "Hint: Try placing %d in row %d, column %d.\n" number
+        (row + 1) (col + 1)
+
+let rec run_game_d sudoku_grid immutable_cells grid_solved move_count start_time
+    statistics =
   match grid_solved with
   | true ->
+      let end_time = Unix.time () in
+      let solve_time = end_time -. start_time in
       print_endline
         ("Congrats, you won!\nYou solved this sudoku puzzle in "
-       ^ string_of_int move_count
-       ^ " moves!\n\
-          Great job! We encourage you to play another exciting game of sudoku.\n"
-        )
-  | false ->
+       ^ string_of_int move_count ^ " moves!\n" ^ "Total time taken: "
+       ^ string_of_float solve_time ^ " seconds.\n"
+       ^ "Great job! We encourage you to play another exciting game of sudoku.\n"
+        );
+      update_statistics statistics solve_time;
+      display_statistics statistics
+  | false -> (
       print_endline
         ("Sudoku Board | Move " ^ string_of_int (move_count - 1) ^ " :");
       let erroneous_rows, completed_rows = check_all_rows sudoku_grid in
@@ -262,14 +315,30 @@ let rec run_game_d (sudoku_grid : int array array) (immutable_cells : PairSet.t)
       print_sudoku_grid_d sudoku_grid erroneous_rows erroneous_cols
         erroneous_boxes ld_erroneous rd_erroneous completed_rows completed_cols
         completed_boxes ld_complete rd_complete immutable_cells;
-      let row, col, number = get_input immutable_cells in
-      sudoku_grid.(row - 1).(col - 1) <- number;
-      run_game_d sudoku_grid immutable_cells
-        (cardinality_of_int_set completed_rows = 9
-        && cardinality_of_int_set completed_cols = 9
-        && cardinality_of_pair_set completed_boxes = 9
-        && ld_complete && rd_complete)
-        (move_count + 1)
+      print_endline "Options: (1) Enter move, (2) Get hint, (3) Quit";
+      let choice = read_int () in
+      match choice with
+      | 1 ->
+          let row, col, number = get_input immutable_cells in
+          sudoku_grid.(row - 1).(col - 1) <- number;
+          let grid_solved' =
+            cardinality_of_int_set completed_rows = 9
+            && cardinality_of_int_set completed_cols = 9
+            && cardinality_of_pair_set completed_boxes = 9
+            && ld_complete && rd_complete
+          in
+          run_game_d sudoku_grid immutable_cells grid_solved' (move_count + 1)
+            start_time statistics
+      | 2 ->
+          hint sudoku_grid;
+          (* Provide a hint to the user *)
+          run_game_d sudoku_grid immutable_cells grid_solved move_count
+            start_time statistics
+      | 3 -> ()
+      | _ ->
+          print_endline "Invalid choice. Please try again.";
+          run_game_d sudoku_grid immutable_cells grid_solved move_count
+            start_time statistics)
 
 (** Open AI. "Create a sudoku game in ocaml - Chat Conversation". Chat GPT.
     April 2024 *)
