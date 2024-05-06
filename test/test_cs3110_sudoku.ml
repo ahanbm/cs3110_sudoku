@@ -4,7 +4,6 @@
 open OUnit2
 open Cs3110_sudoku
 include Diagonal_sudoku
-include Connect_four
 
 let trivial_test _ = assert (0 = 0)
 
