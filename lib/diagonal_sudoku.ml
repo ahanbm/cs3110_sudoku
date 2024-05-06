@@ -1,6 +1,3 @@
-(* UI/PRINTING METHODS *)
-
-(* Function to read lines from a file into a list *)
 let read_lines filename =
   let in_channel = open_in filename in
   let rec read_lines_helper acc =
@@ -13,13 +10,8 @@ let read_lines filename =
   in
   read_lines_helper []
 
-(* Print each line from a list of strings *)
 let print_string_list lst = List.iter print_endline lst
 
-(* DATA REPRESENTATION *)
-
-(* Type for the set of pairs of ints we use to check wether a cell's value can
-   be changed *)
 module Pair = struct
   type t = int * int
 
@@ -30,7 +22,6 @@ module PairSet = Set.Make (Pair)
 
 let cardinality_of_pair_set set = PairSet.fold (fun _ acc -> acc + 1) set 0
 
-(* Type for the set of ints we use to check wether a row/coll is erroneous *)
 module Integer = struct
   type t = int
 
@@ -41,16 +32,12 @@ module IntegerSet = Set.Make (Integer)
 
 let cardinality_of_int_set set = IntegerSet.fold (fun _ acc -> acc + 1) set 0
 
-(* Function to process each cell of the CSV *)
 let preset_of_csv filename =
   let sudoku_grid = Array.make_matrix 9 9 0 in
   let immutable_cells = ref PairSet.empty in
-  (* Load the CSV file *)
   let data = Csv.load filename in
-  (* Iterate over rows with their indices *)
   List.iteri
     (fun row_index row ->
-      (* Iterate over columns with their indices *)
       List.iteri
         (fun col_index cell ->
           try
@@ -66,15 +53,10 @@ let preset_of_csv filename =
     data;
   (sudoku_grid, !immutable_cells)
 
-(* GAME-RUNNING METHODS *)
-
-(* Clears the current line *)
 let clear_line () =
   output_string stdout "\027[A\027[2K";
   flush stdout
 
-(* Gets input from the user in the desired format and forbids changing of
-   immutable blue cells *)
 let rec get_input immutable_cells =
   let input_string = read_line () in
   let regex = Str.regexp "^\\([1-9]\\) \\([1-9]\\) \\([0-9]\\)$" in
@@ -93,8 +75,6 @@ let rec get_input immutable_cells =
     let () = clear_line () in
     get_input immutable_cells
 
-(* Function to check each row of the sudoku grid and update their color if
-   necessary *)
 (* this method was written using information from GPT-4, accessed Friday, April
    26th, 2024 *)
 let check_all_rows sudoku_grid =
@@ -126,8 +106,6 @@ let check_all_rows sudoku_grid =
   (!erroneous_rows, !completed_rows)
 (* return values *)
 
-(* Function to check each col of the sudoku grid and update their color if
-   necessary *)
 let check_all_cols sudoku_grid =
   let erroneous_cols = ref IntegerSet.empty in
   let completed_cols = ref IntegerSet.empty in
@@ -156,8 +134,6 @@ let check_all_cols sudoku_grid =
   (!erroneous_cols, !completed_cols)
 (* return values *)
 
-(* Function to check each box of the sudoku grid and update their color if
-   necessary *)
 let check_all_boxes sudoku_grid =
   let erroneous_boxes = ref PairSet.empty in
   let completed_boxes = ref PairSet.empty in
@@ -217,16 +193,10 @@ let check_diagonal sudoku_grid checking_left_diagonal =
   (* End row and col loop *)
   (!erroneous, Hashtbl.length seen = 9)
 
-(* Function to check the left diagonal of the sudoku grid and update its color
-   if necessary *)
 let check_left_diagonal sudoku_grid = check_diagonal sudoku_grid true
-
-(* Function to check the left diagonal of the sudoku grid and update its color
-   if necessary *)
 let check_right_diagonal sudoku_grid = check_diagonal sudoku_grid false
 
 (* This code was written using information from GPT-4 *)
-(* Function to print the sudoku grid *)
 let print_sudoku_grid_d grid erroneous_rows erroneous_cols erroneous_boxes
     ld_erroneous rd_erroneous completed_rows completed_cols completed_boxes
     ld_complete rd_complete immutable_cells =
@@ -271,7 +241,6 @@ let print_sudoku_grid_d grid erroneous_rows erroneous_cols erroneous_boxes
   done;
   print_endline "-------------------------"
 
-(* Runs game *)
 let rec run_game_d (sudoku_grid : int array array) (immutable_cells : PairSet.t)
     (grid_solved : bool) (move_count : int) =
   match grid_solved with
@@ -301,3 +270,6 @@ let rec run_game_d (sudoku_grid : int array array) (immutable_cells : PairSet.t)
         && cardinality_of_pair_set completed_boxes = 9
         && ld_complete && rd_complete)
         (move_count + 1)
+
+(** Open AI. "Create a sudoku game in ocaml - Chat Conversation". Chat GPT.
+    April 2024 *)
