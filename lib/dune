@@ -1,2 +1,5 @@
 (library
- (name cs3110_sudoku))
+ (name cs3110_sudoku)
+ (public_name cs3110_sudoku)
+ (modules diagonal_sudoku timer statistics)
+ (libraries csv str unix))

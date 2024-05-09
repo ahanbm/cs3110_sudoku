@@ -1,0 +1,21 @@
+
+In Connect Four, your goal is to be the first player to connect four of your colored discs in a row, column, or diagonal.
+
+How to Play:
+
+Making Moves:
+  Players take turns dropping colored discs into a vertical grid.
+  Input format: <column>
+  <column> is a digit 1-7 representing the column where you want to drop your disc.
+
+Move Count:
+  The game keeps track of each player's move count.
+  Try to win the game with the fewest possible moves!
+
+Game Rules and Feedback:
+  If a player successfully connects four discs in a row, column, or diagonal, they win the game.
+  If the grid is filled without a winner, the game ends in a draw.
+  The game will indicate who wins if it senses a victory.
+  If a column is full, attempting to drop a disc in that column will prompt you to choose another column.
+
+Enjoy the game and good luck!

@@ -1,4 +1,4 @@
-# cs3110-chess
+# cs3110-sudoku
 
 Ahan Mishra - abm247
 

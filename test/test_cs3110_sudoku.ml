@@ -1,0 +1,473 @@
+(**@authors: Peter Favero pmf66, Ahan Mishra abm247 *)
+(*To compile, run: dune test in the terminal *)
+
+open OUnit2
+open Cs3110_sudoku
+include Diagonal_sudoku
+
+let trivial_test _ = assert (0 = 0)
+
+let grid_rows_then_cols_test sudoku_grid erroneous_rows_count
+    completed_rows_count erroneous_cols_count completed_cols_count _ =
+  let erroneous_rows, completed_rows = check_all_rows sudoku_grid in
+  let erroneous_cols, completed_cols = check_all_cols sudoku_grid in
+  assert (
+    cardinality_of_int_set erroneous_rows = erroneous_rows_count
+    && cardinality_of_int_set completed_rows = completed_rows_count
+    && cardinality_of_int_set erroneous_cols = erroneous_cols_count
+    && cardinality_of_int_set completed_cols = completed_cols_count)
+
+let grid_boxes_test sudoku_grid erroneous_boxes_count completed_boxes_count _ =
+  let erroneous_boxes, completed_boxes = check_all_boxes sudoku_grid in
+  assert (
+    cardinality_of_pair_set erroneous_boxes = erroneous_boxes_count
+    && cardinality_of_pair_set completed_boxes = completed_boxes_count)
+
+let grid_left_then_right_diagonals_test sudoku_grid ld_e_expected ld_c_expected
+    rd_e_expected rd_c_expected _ =
+  let ld_erroneous, ld_complete = check_left_diagonal sudoku_grid in
+  let rd_erroneous, rd_complete = check_right_diagonal sudoku_grid in
+  assert (
+    ld_complete = ld_c_expected
+    && ld_erroneous = ld_e_expected
+    && rd_complete = rd_c_expected
+    && rd_erroneous = rd_e_expected)
+
+(* Note: this function is implemented in here mirroring the logic in run_game
+   because using a function like this in run_game's implementation, each of
+   check_all_rows, check_all_cols, check_all_boxes, etc. would be computed
+   twice, reducing efficiency. *)
+let is_solved sudoku_grid input_bool _ =
+  let _, completed_rows = check_all_rows sudoku_grid in
+  let _, completed_cols = check_all_cols sudoku_grid in
+  let _, completed_boxes = check_all_boxes sudoku_grid in
+  let _, ld_complete = check_left_diagonal sudoku_grid in
+  let _, rd_complete = check_right_diagonal sudoku_grid in
+  assert (
+    (cardinality_of_int_set completed_rows = 9
+    && cardinality_of_int_set completed_cols = 9
+    && cardinality_of_pair_set completed_boxes = 9
+    && ld_complete && rd_complete)
+    = input_bool)
+
+let empty_grid = Array.make_matrix 9 9 0
+let homogenous_grid = Array.make_matrix 9 9 1
+let solved_grid_path = "test_data/solved.csv"
+let solved_grid = fst (preset_of_csv solved_grid_path)
+
+let solved_excpet_for_last_row_grid_path =
+  "test_data/almost_solved_missing_row.csv"
+
+let solved_excpet_for_last_row_grid =
+  fst (preset_of_csv solved_excpet_for_last_row_grid_path)
+
+let solved_except_for_topleft_cell_path =
+  "test_data/almost_solved_missing_topleft_cell.csv"
+
+let solved_except_for_topleft_cell =
+  fst (preset_of_csv solved_except_for_topleft_cell_path)
+
+let test_cardinality_of_pair_set_empty _ =
+  let empty_set = PairSet.empty in
+  assert_equal 0
+    (cardinality_of_pair_set empty_set)
+    ~msg:"Empty set should have cardinality 0"
+
+let test_cardinality_of_pair_set_singleton _ =
+  let singleton_set = PairSet.singleton (1, 1) in
+  assert_equal 1
+    (cardinality_of_pair_set singleton_set)
+    ~msg:"Singleton set should have cardinality 1"
+
+let test_cardinality_of_pair_set_large _ =
+  let set = PairSet.of_list [ (1, 1); (2, 2); (3, 3); (4, 4); (5, 5) ] in
+  assert_equal 5
+    (cardinality_of_pair_set set)
+    ~msg:"Set with multiple elements should have correct cardinality"
+
+let test_cardinality_of_pair_set_duplicate_elements _ =
+  let set = PairSet.of_list [ (1, 1); (1, 1); (2, 2); (3, 3); (3, 3) ] in
+  assert_equal 3
+    (cardinality_of_pair_set set)
+    ~msg:"Set with duplicate elements should have correct cardinality"
+
+let test_cardinality_of_pair_set_empty_set _ =
+  let set = PairSet.of_list [] in
+  assert_equal 0
+    (cardinality_of_pair_set set)
+    ~msg:"Set with no elements should have cardinality 0"
+
+let test_cardinality_of_pair_set_mixed_elements _ =
+  let set = PairSet.of_list [ (1, 1); (2, 3); (4, 4); (5, 5) ] in
+  assert_equal 4
+    (cardinality_of_pair_set set)
+    ~msg:"Set with mixed elements should have correct cardinality"
+
+let test_cardinality_of_pair_set_negative_elements _ =
+  let set = PairSet.of_list [ (1, -1); (-2, 3); (-4, -4); (-5, 5) ] in
+  assert_equal 4
+    (cardinality_of_pair_set set)
+    ~msg:"Set with negative elements should have correct cardinality"
+
+let test_cardinality_of_pair_set_repeated_elements _ =
+  let set = PairSet.of_list [ (1, 1); (1, 1); (1, 1); (1, 1) ] in
+  assert_equal 1
+    (cardinality_of_pair_set set)
+    ~msg:"Set with repeated elements should have cardinality 1"
+
+let test_cardinality_of_pair_set_random_elements _ =
+  let set = PairSet.of_list [ (2, 3); (5, 7); (3, 1); (2, 3); (5, 7) ] in
+  assert_equal 3
+    (cardinality_of_pair_set set)
+    ~msg:"Set with random elements should have correct cardinality"
+
+let test_cardinality_of_int_set_empty _ =
+  let set = IntegerSet.empty in
+  let result = cardinality_of_int_set set in
+  assert_equal 0 result ~msg:"Empty set should have cardinality 0."
+
+let test_cardinality_of_int_set_singleton _ =
+  let set = IntegerSet.singleton 42 in
+  let result = cardinality_of_int_set set in
+  assert_equal 1 result ~msg:"Singleton set should have cardinality 1."
+
+let test_cardinality_of_int_set_middle _ =
+  let set =
+    List.fold_left
+      (fun acc x -> IntegerSet.add x acc)
+      IntegerSet.empty
+      (List.init 300 (fun x -> x))
+  in
+  let result = cardinality_of_int_set set in
+  assert_equal 300 result ~msg:"Middling set should have cardinality 300."
+
+let test_cardinality_of_int_set_large _ =
+  let set =
+    List.fold_left
+      (fun acc x -> IntegerSet.add x acc)
+      IntegerSet.empty
+      (List.init 1000 (fun x -> x))
+  in
+  let result = cardinality_of_int_set set in
+  assert_equal 1000 result ~msg:"Large set should have cardinality 1000."
+
+(* Additional tests *)
+let test_cardinality_of_int_set_duplicate _ =
+  let set = IntegerSet.of_list [ 1; 2; 3; 1; 2; 3 ] in
+  let result = cardinality_of_int_set set in
+  assert_equal 3 result ~msg:"Set with duplicates should have unique elements."
+
+let test_cardinality_of_int_set_zero _ =
+  let set = IntegerSet.of_list [ 0 ] in
+  let result = cardinality_of_int_set set in
+  assert_equal 1 result ~msg:"Set with zero should have cardinality 1."
+
+let test_cardinality_of_int_set_negative _ =
+  let set = IntegerSet.of_list [ -1; -2; -3 ] in
+  let result = cardinality_of_int_set set in
+  assert_equal 3 result
+    ~msg:"Set with negative numbers should have cardinality 3."
+
+let test_cardinality_of_int_set_mixed _ =
+  let set = IntegerSet.of_list [ -3; 1; 5; -3; 0; 5; 1 ] in
+  let result = cardinality_of_int_set set in
+  assert_equal 4 result ~msg:"Set with mixed numbers should have cardinality 4."
+
+let test_cardinality_of_int_set_repeated _ =
+  let set = IntegerSet.of_list [ 1; 1; 1; 1; 1 ] in
+  let result = cardinality_of_int_set set in
+  assert_equal 1 result
+    ~msg:"Set with repeated elements should have cardinality 1."
+
+let test_preset_of_csv _ =
+  let filename = "test_data/almost_solved_missing_topleft_cell.csv" in
+  let sudoku_grid, immutable_cells = preset_of_csv filename in
+  (* Assert dimensions of the sudoku grid *)
+  assert_equal 9 (Array.length sudoku_grid)
+    ~msg:"Sudoku grid should have 9 rows";
+  assert_equal 9
+    (Array.length sudoku_grid.(0))
+    ~msg:"Sudoku grid should have 9 columns";
+  (* Assert specific values in the grid *)
+  assert_equal 0 sudoku_grid.(0).(0) ~msg:"First cell should have value 0";
+  assert_equal 2 sudoku_grid.(0).(1) ~msg:"Second cell should have value 3";
+  assert_equal 5 sudoku_grid.(0).(2) ~msg:"Third cell should have value 5";
+  assert_equal 5
+    sudoku_grid.(8).(7)
+    ~msg:"Second to last cell in the last row should have value 7";
+  assert_equal 3 sudoku_grid.(8).(8) ~msg:"Last cell should have value 9";
+  (* Assert immutable cells *)
+  assert_bool "(0, 1) should be an immutable cell"
+    (PairSet.mem (0, 1) immutable_cells);
+  assert_bool "(4, 6) should be an immutable cell"
+    (PairSet.mem (4, 6) immutable_cells);
+  (* Assert cells that should not be immutable *)
+  assert_bool "(0, 0) should not be an immutable cell"
+    (not (PairSet.mem (0, 0) immutable_cells));
+  assert_bool "(8, 8) should be an immutable cell"
+    (PairSet.mem (8, 8) immutable_cells);
+
+  (* Assert specific cells that should be immutable *)
+  assert_bool "(1, 3) should be an immutable cell"
+    (PairSet.mem (1, 3) immutable_cells);
+  assert_bool "(5, 7) should be an immutable cell"
+    (PairSet.mem (5, 7) immutable_cells);
+  (* Continue assertions for immutable cells *)
+  ()
+
+let test_preset_of_csv_2 _ =
+  let filename = "test_data/almost_solved_missing_row.csv" in
+  let sudoku_grid, immutable_cells = preset_of_csv filename in
+  (* Check specific cells *)
+  assert_equal 9 sudoku_grid.(0).(0) ~msg:"Value at row 1, column 1 should be 9";
+  assert_equal 1 sudoku_grid.(0).(8) ~msg:"Value at row 1, column 9 should be 1";
+  assert_equal 0 sudoku_grid.(8).(8) ~msg:"Value at row 9, column 9 should be 0";
+  (* Check immutable cells *)
+  assert_bool "Top left cell should be immutable"
+    (PairSet.mem (0, 0) immutable_cells);
+  assert_bool "Top right cell should be immutable"
+    (PairSet.mem (0, 8) immutable_cells);
+  assert_bool "Bottom right cell should not be immutable"
+    (not (PairSet.mem (8, 8) immutable_cells));
+  (* Check some other cells *)
+  assert_equal 8 sudoku_grid.(1).(1) ~msg:"Value at row 2, column 2 should be 8";
+  assert_equal 1 sudoku_grid.(3).(4) ~msg:"Value at row 4, column 5 should be 1";
+  assert_equal 4 sudoku_grid.(7).(6) ~msg:"Value at row 8, column 7 should be 4";
+  (* Check some other immutable cells *)
+  assert_bool "Cell at row 2, column 3 should be immutable"
+    (PairSet.mem (1, 2) immutable_cells);
+  assert_bool "Cell at row 4, column 5 should be immutable"
+    (PairSet.mem (3, 4) immutable_cells);
+  assert_bool "Cell at row 8, column 7 should be immutable"
+    (PairSet.mem (7, 6) immutable_cells);
+  (* Check some non-existent cells *)
+  assert_equal 8 sudoku_grid.(5).(0) ~msg:"Value at row 6, column 1 should be 8";
+  assert_equal 3 sudoku_grid.(4).(7) ~msg:"Value at row 5, column 8 should be 0";
+  (* Check non-immutable cells *)
+  assert_bool "Cell at row 3, column 2 should be immutable"
+    (PairSet.mem (2, 1) immutable_cells);
+  assert_bool "Cell at row 6, column 5 should be immutable"
+    (PairSet.mem (5, 4) immutable_cells);
+  assert_bool "Cell at row 9, column 3 should not be immutable"
+    (not (PairSet.mem (8, 2) immutable_cells))
+
+let test_preset_of_csv_3 _ =
+  let filename = "test_data/solved.csv" in
+  let sudoku_grid, immutable_cells = preset_of_csv filename in
+  (* Check specific cells *)
+  assert_equal 9 sudoku_grid.(0).(0) ~msg:"Value at row 1, column 1 should be 9";
+  assert_equal 1 sudoku_grid.(0).(8) ~msg:"Value at row 1, column 9 should be 1";
+  assert_equal 3 sudoku_grid.(8).(8) ~msg:"Value at row 9, column 9 should be 3";
+  (* Check immutable cells *)
+  assert_bool "Top left cell should be immutable"
+    (PairSet.mem (0, 0) immutable_cells);
+  assert_bool "Top right cell should be immutable"
+    (PairSet.mem (0, 8) immutable_cells);
+  assert_bool "Bottom right cell should be immutable"
+    (PairSet.mem (8, 8) immutable_cells);
+  (* Check some other cells *)
+  assert_equal 4 sudoku_grid.(2).(2) ~msg:"Value at row 3, column 3 should be 4";
+  assert_equal 1 sudoku_grid.(3).(4) ~msg:"Value at row 4, column 5 should be 1";
+  assert_equal 1 sudoku_grid.(6).(6) ~msg:"Value at row 7, column 7 should be 1";
+  (* Check some other immutable cells *)
+  assert_bool "Cell at row 3, column 2 should be immutable"
+    (PairSet.mem (2, 1) immutable_cells);
+  assert_bool "Cell at row 4, column 5 should be immutable"
+    (PairSet.mem (3, 4) immutable_cells);
+  assert_bool "Cell at row 7, column 7 should be immutable"
+    (PairSet.mem (6, 6) immutable_cells);
+  (* Check some non-existent cells *)
+  assert_equal 8 sudoku_grid.(5).(0) ~msg:"Value at row 6, column 1 should be 8";
+  assert_equal 3 sudoku_grid.(4).(7) ~msg:"Value at row 5, column 8 should be 3";
+  (* Check non-immutable cells *)
+  assert_bool "Cell at row 2, column 3 should be immutable"
+    (PairSet.mem (1, 2) immutable_cells);
+  assert_bool "Cell at row 5, column 4 should be immutable"
+    (PairSet.mem (4, 3) immutable_cells);
+  assert_bool "Cell at row 8, column 2 should be immutable"
+    (PairSet.mem (7, 1) immutable_cells)
+
+let load_sudoku_grid_from_csv filename =
+  let ic = open_in filename in
+  let sudoku_grid = Array.make_matrix 9 9 0 in
+  try
+    for row = 0 to 8 do
+      let line = input_line ic in
+      let values = String.split_on_char ',' line in
+      List.iteri
+        (fun col_index cell ->
+          let value = int_of_string cell in
+          sudoku_grid.(row).(col_index) <- value)
+        values
+    done;
+    close_in ic;
+    sudoku_grid
+  with e ->
+    close_in ic;
+    raise e
+
+let test_check_all_cols _ =
+  (* Load the sudoku grid from the CSV file *)
+  let sudoku_grid = load_sudoku_grid_from_csv "test_data/solved.csv" in
+
+  (* Test the check_all_cols function *)
+  let erroneous_cols, _ = check_all_cols sudoku_grid in
+
+  (* Add assertions to check the results *)
+  assert_equal IntegerSet.empty erroneous_cols
+    ~msg:"No erroneous columns should be found"
+
+let test_check_all_rows _ =
+  let sudoku_grid = load_sudoku_grid_from_csv "test_data/solved.csv" in
+  let erroneous_rows, completed_rows = check_all_rows sudoku_grid in
+  (* Check erroneous rows *)
+  assert_bool "No rows should be erroneous" (IntegerSet.is_empty erroneous_rows);
+  (* Check completed rows *)
+  assert_equal 9
+    (IntegerSet.cardinal completed_rows)
+    ~msg:"All rows should be completed"
+
+let test_check_all_boxes _ =
+  (* Load the sudoku grid from the CSV file *)
+  let sudoku_grid = load_sudoku_grid_from_csv "test_data/solved.csv" in
+
+  (* Test the check_all_boxes function *)
+  let erroneous_boxes, _ = check_all_boxes sudoku_grid in
+
+  (* Add assertions to check the results *)
+  assert_equal PairSet.empty erroneous_boxes
+    ~msg:"No erroneous boxes should be found"
+
+let test_preset_of_csv_initial _ =
+  (* Load the sudoku grid from the CSV file *)
+  let sudoku_grid = load_sudoku_grid_from_csv "test_data/initial.csv" in
+
+  (* Call the preset_of_csv function *)
+  let preset_result = preset_of_csv "test_data/initial.csv" in
+
+  (* Check if the result is of the correct type *)
+  assert_equal (Array.length sudoku_grid)
+    (Array.length (fst preset_result))
+    ~msg:"The number of rows in the loaded grid should match the result";
+
+  assert_equal
+    (Array.length sudoku_grid.(0))
+    (Array.length (fst preset_result).(0))
+    ~msg:"The number of columns in the loaded grid should match the result";
+
+  (* Check if the values are correctly loaded *)
+  for i = 0 to 8 do
+    for j = 0 to 8 do
+      assert_equal
+        sudoku_grid.(i).(j)
+        (fst preset_result).(i).(j)
+        ~msg:"The values in the loaded grid should match the result"
+    done
+  done
+
+let ounit2_tests =
+  "ounit2 test suite"
+  >::: [
+         "a trivial test" >:: trivial_test;
+         "Test check_all_boxes" >:: test_check_all_boxes;
+         "Test check_all_rows" >:: test_check_all_rows;
+         "Test check_all_cols" >:: test_check_all_cols;
+         "Preset of CSV" >:: test_preset_of_csv;
+         "Preset of CSV 2" >:: test_preset_of_csv_2;
+         "Preset of CSV 3" >:: test_preset_of_csv_3;
+         "Preset of CSV Initial" >:: test_preset_of_csv_initial;
+         "Empty Set" >:: test_cardinality_of_pair_set_empty;
+         "Singleton Set" >:: test_cardinality_of_pair_set_singleton;
+         "Large Set" >:: test_cardinality_of_pair_set_large;
+         "Set with Duplicate Elements"
+         >:: test_cardinality_of_pair_set_duplicate_elements;
+         "Empty Set" >:: test_cardinality_of_pair_set_empty_set;
+         "Set with Mixed Elements"
+         >:: test_cardinality_of_pair_set_mixed_elements;
+         "Set with Negative Elements"
+         >:: test_cardinality_of_pair_set_negative_elements;
+         "Set with Repeated Elements"
+         >:: test_cardinality_of_pair_set_repeated_elements;
+         "Set with Random Elements"
+         >:: test_cardinality_of_pair_set_random_elements;
+         "Empty Set" >:: test_cardinality_of_int_set_empty;
+         "Singleton Set" >:: test_cardinality_of_int_set_singleton;
+         "Large Set" >:: test_cardinality_of_int_set_large;
+         "Middling Set" >:: test_cardinality_of_int_set_middle;
+         "Set with Duplicates" >:: test_cardinality_of_int_set_duplicate;
+         "Set with Zero" >:: test_cardinality_of_int_set_zero;
+         "Set with Negative Numbers" >:: test_cardinality_of_int_set_negative;
+         "Set with Mixed Numbers" >:: test_cardinality_of_int_set_mixed;
+         "Set with Repeated Elements" >:: test_cardinality_of_int_set_repeated;
+         "An empty grid should have no erroneous rows, no completed rows, no \
+          erroneous cols, and no completed cols"
+         >:: grid_rows_then_cols_test empty_grid 0 0 0 0;
+         "An empty grid should have no erroneous boxes and no completed boxes"
+         >:: grid_boxes_test empty_grid 0 0;
+         "An empty grid should have no erroneous diagonals and no completed \
+          diagonals"
+         >:: grid_left_then_right_diagonals_test empty_grid false false false
+               false;
+         "An empty grid should not be flagged as solved by the logic in \
+          run_game" >:: is_solved empty_grid false;
+         "A homogenous grid should have 9 erroneous rows, no completed rows, 9 \
+          erroneous cols, and no completed cols"
+         >:: grid_rows_then_cols_test homogenous_grid 9 0 9 0;
+         "A homogenous grid should have 9 erroneous boxes and no completed \
+          boxes"
+         >:: grid_boxes_test homogenous_grid 9 0;
+         "A homogenous grid should have both diagonals erroneous and no \
+          completed diagonals"
+         >:: grid_left_then_right_diagonals_test homogenous_grid true false true
+               false;
+         "A homogenous grid should not be flagged as solved by the logic in \
+          run_game"
+         >:: is_solved homogenous_grid false;
+         "A solved grid should have no erroneous rows, 9 completed rows, no \
+          erroneous cols, and 9 completed cols"
+         >:: grid_rows_then_cols_test solved_grid 0 9 0 9;
+         "A solved grid should have 0 erroneous boxes and 9 completed boxes"
+         >:: grid_boxes_test solved_grid 0 9;
+         "A solved grid should have no erroneous diagonals and both diagonals \
+          completed"
+         >:: grid_left_then_right_diagonals_test solved_grid false true false
+               true;
+         "A homogenous grid should  be flagged as solved by the logic in \
+          run_game" >:: is_solved solved_grid true;
+         "An almost-solved-with-empty-last-row-grid should have no erroneous \
+          rows, 8 completed rows, no erroneous cols, and no completed cols"
+         >:: grid_rows_then_cols_test solved_excpet_for_last_row_grid 0 8 0 0;
+         "An almost-solved-with-empty-last-row-grid should have 0 erroneous \
+          boxes and 6 completed boxes"
+         >:: grid_boxes_test solved_excpet_for_last_row_grid 0 6;
+         "An almost-solved-with-empty-last-row-grid grid should have no \
+          erroneous diagonals and both diagonals completed"
+         >:: grid_left_then_right_diagonals_test solved_excpet_for_last_row_grid
+               false false false false;
+         "An almost-solved-with-empty-last-row-grid should not be flagged as \
+          solved by the logic in run_game"
+         >:: is_solved solved_excpet_for_last_row_grid false;
+         "An almost-solved-with-empty-topleft-cell-grid should have 0 \
+          erroneous rows, 8 completed rows, 0 erroneous cols, and 8 completed \
+          cols"
+         >:: grid_rows_then_cols_test solved_except_for_topleft_cell 0 8 0 8;
+         "An almost-solved-with-empty-topleft-cell-grid should have 0 \
+          erroneous boxes and 8 completed boxes"
+         >:: grid_boxes_test solved_except_for_topleft_cell 0 8;
+         "An almost-solved-with-empty-topleft-cell-grid grid should have no \
+          erroneous diagonals and only the right diagonal completed"
+         >:: grid_left_then_right_diagonals_test solved_except_for_topleft_cell
+               false false false true;
+         "An almost-solved-with-empty-topleft-cell-grid should not be flagged \
+          as solved by the logic in run_game"
+         >:: is_solved solved_except_for_topleft_cell false;
+       ]
+
+(* RUN TESTS *)
+
+let () =
+  print_endline "\nOUnit2 tests:";
+  run_test_tt_main ounit2_tests
+
+(** Open AI. "Write a test suite for this code - Chat Conversation". Chat GPT.
+    May 2024 *)
