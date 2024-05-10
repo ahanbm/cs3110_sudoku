@@ -1,3 +1,7 @@
+(*To run the main method, use: 
+   dune exec ./bin/main.exe 
+in the terminal *)
+
 include Statistics
 
 let read_lines filename =
@@ -76,6 +80,19 @@ let rec get_input immutable_cells =
   else
     let () = clear_line () in
     get_input immutable_cells
+
+let rec get_play_option () =
+  let input_string = read_line () in
+  let regex = Str.regexp "^[1-4]$"
+  in
+  if Str.string_match regex input_string 0 then
+    let number = int_of_string input_string in
+    let () = clear_line () in
+    let () = print_endline ("Input: (" ^ input_string ^ ")") in
+    number
+  else
+    let () = clear_line () in
+    get_play_option ()
 
 (* this method was written using information from GPT-4, accessed Friday, April
    26th, 2024 *)
@@ -285,9 +302,9 @@ let rec find_valid_move sudoku_grid row col =
 (* Function to provide a hint to the user *)
 let hint sudoku_grid =
   match find_valid_move sudoku_grid 0 0 with
-  | None -> print_endline "No valid moves available."
+  | None -> print_endline "Hint : No valid moves available.\n\n"
   | Some (row, col, number) ->
-      Printf.printf "Hint: Try placing %d in row %d, column %d.\n" number
+      Printf.printf "Hint : Try placing %d in row %d, column %d.\n\n" number
         (row + 1) (col + 1)
 
 let rec run_game_d sudoku_grid immutable_cells grid_solved move_count start_time
@@ -300,7 +317,7 @@ let rec run_game_d sudoku_grid immutable_cells grid_solved move_count start_time
         ("Congrats, you won!\nYou solved this sudoku puzzle in "
        ^ string_of_int move_count ^ " moves!\n" ^ "Total time taken: "
        ^ string_of_float solve_time ^ " seconds.\n"
-       ^ "Great job! We encourage you to play another exciting game of sudoku.\n"
+       ^ "Great job! We encourage you to play another exciting game of diagonal sudoku.\n"
         );
       update_statistics statistics solve_time;
       display_statistics statistics
@@ -315,8 +332,8 @@ let rec run_game_d sudoku_grid immutable_cells grid_solved move_count start_time
       print_sudoku_grid_d sudoku_grid erroneous_rows erroneous_cols
         erroneous_boxes ld_erroneous rd_erroneous completed_rows completed_cols
         completed_boxes ld_complete rd_complete immutable_cells;
-      print_endline "Options: (1) Enter move, (2) Get hint, (3) Quit";
-      let choice = read_int () in
+      print_endline "Options: (1) Enter move, (2) Get hint, (3) Get help, (4) Quit.";
+      let choice = get_play_option () in
       match choice with
       | 1 ->
           let row, col, number = get_input immutable_cells in
@@ -334,7 +351,14 @@ let rec run_game_d sudoku_grid immutable_cells grid_solved move_count start_time
           (* Provide a hint to the user *)
           run_game_d sudoku_grid immutable_cells grid_solved move_count
             start_time statistics
-      | 3 -> ()
+      | 3 -> 
+        let help_user_d_path = "data/private/help_user_d.txt" in
+        let lines = read_lines help_user_d_path in
+        let () = print_string_list lines in
+        (* Provide help to the user *)
+        run_game_d sudoku_grid immutable_cells grid_solved move_count
+            start_time statistics
+      | 4 -> ()
       | _ ->
           print_endline "Invalid choice. Please try again.";
           run_game_d sudoku_grid immutable_cells grid_solved move_count

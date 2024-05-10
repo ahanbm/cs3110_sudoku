@@ -16,6 +16,5 @@ The cells with blue numbers in them are immutable, as part the initial condition
 If you try to change the immutable blue cells, the game erase your input it but won't count that as a move. 
 If there is a formatting error, the game erase your input it but won't count that as a move. 
 
-You can enter 'help' to receive these formatting tips at any time, which also won't count towards your moves.
 Good luck! You've got this! Happy sudoku-solving!
 

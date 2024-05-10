@@ -1,5 +1,7 @@
 (**@authors: Peter Favero pmf66, Ahan Mishra abm247 *)
-(*To compile, run: dune exec ./bin/main.exe in the terminal *)
+(*To run the main method, use: 
+   dune exec ./bin/main.exe 
+in the terminal *)
 
 open Cs3110_sudoku
 include Diagonal_sudoku
