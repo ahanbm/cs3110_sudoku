@@ -366,3 +366,5 @@ let rec run_game_d sudoku_grid immutable_cells grid_solved move_count start_time
 
 (** Open AI. "Create a sudoku game in ocaml - Chat Conversation". Chat GPT.
     April 2024 *)
+
+(* Talk about parametes, update diagonal_sudoku.mli *)
