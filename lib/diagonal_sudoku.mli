@@ -44,7 +44,7 @@ val get_input : PairSet.t -> int * int * int
 (** Gets input from the user in the desired format and forbids changing of
     immutable blue cells *)
 
-val get_play_option : PairSet.t -> int * int * int
+val get_play_option : unit -> int
 (** Gets input from the user in the desired format as an integer 1-4, clearing the line and re-prompting otherwise *)
 
 val check_all_rows : int array array -> IntegerSet.t * IntegerSet.t
