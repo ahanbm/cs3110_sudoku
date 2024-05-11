@@ -69,33 +69,32 @@ let test_check_erroneous_completed_boxes _ =
   let erroneous_boxes, completed_boxes = check_all_boxes sudoku_grid in
   (* Assert that the erroneous boxes set contains the correct boxes *)
   assert_bool "Box 0 should be erroneous" (PairSet.mem (0, 0) erroneous_boxes);
-  assert_bool "Box 8 should be erroneous" (PairSet.mem (6, 6) erroneous_boxes);
+  assert_bool "Box 8 should be erroneous" (PairSet.mem (2, 2) erroneous_boxes);
   (* Assert that the completed boxes set contains the correct boxes *)
-  assert_bool "Box 1 should be completed" (PairSet.mem (0, 3) completed_boxes);
-  assert_bool "Box 2 should be completed" (PairSet.mem (0, 6) completed_boxes);
-  assert_bool "Box 3 should be completed" (PairSet.mem (3, 0) completed_boxes);
-  assert_bool "Box 4 should be completed" (PairSet.mem (3, 3) completed_boxes);
-  assert_bool "Box 5 should be completed" (PairSet.mem (3, 6) completed_boxes);
-  assert_bool "Box 6 should be completed" (PairSet.mem (6, 0) completed_boxes);
-  assert_bool "Box 7 should be completed" (PairSet.mem (6, 3) completed_boxes)
+  assert_bool "Box 1 should be completed" (PairSet.mem (0, 1) completed_boxes);
+  assert_bool "Box 2 should be completed" (PairSet.mem (0, 2) completed_boxes);
+  assert_bool "Box 3 should be completed" (PairSet.mem (1, 0) completed_boxes);
+  assert_bool "Box 4 should be completed" (PairSet.mem (1, 1) completed_boxes);
+  assert_bool "Box 5 should be completed" (PairSet.mem (1, 2) completed_boxes);
+  assert_bool "Box 6 should be completed" (PairSet.mem (2, 0) completed_boxes);
+  assert_bool "Box 7 should be completed" (PairSet.mem (2, 1) completed_boxes)
 
-(* left diagonal should be erroneous = true; and the length = 9 should be
-   false *)
-let test_check_erroneous_completed_diags _ =
+let test_check_erroneous_completed_left_diag _ =
   let filename = "test_data/2_erroneous_row.csv" in
   let sudoku_grid, _ = preset_of_csv filename in
-  let erroneous, completed_rows = check_diagonal sudoku_grid true in
+  let erroneous, correct_length = check_left_diagonal sudoku_grid in
   (* Assert that the erroneous rows set contains the correct rows *)
-  assert_bool "Row 0 should be erroneous" (IntegerSet.mem 0 erroneous);
-  assert_bool "Row 8 should be erroneous" (IntegerSet.mem 8 erroneous);
-  (* Assert that the completed rows set contains the correct rows *)
-  assert_bool "Row 1 should be completed" (IntegerSet.mem 1 completed_rows);
-  assert_bool "Row 2 should be completed" (IntegerSet.mem 2 completed_rows);
-  assert_bool "Row 3 should be completed" (IntegerSet.mem 3 completed_rows);
-  assert_bool "Row 4 should be completed" (IntegerSet.mem 4 completed_rows);
-  assert_bool "Row 5 should be completed" (IntegerSet.mem 5 completed_rows);
-  assert_bool "Row 6 should be completed" (IntegerSet.mem 6 completed_rows);
-  assert_bool "Row 7 should be completed" (IntegerSet.mem 7 completed_rows)
+  assert_bool "Left diagonal should be erroneous" erroneous;
+  assert_bool "Left diagonal should not be the correct length"
+    (not correct_length)
+
+let test_check_erroneous_completed_right_diag _ =
+  let filename = "test_data/2_erroneous_row.csv" in
+  let sudoku_grid, _ = preset_of_csv filename in
+  let erroneous, correct_length = check_right_diagonal sudoku_grid in
+  (* Assert that the erroneous rows set contains the correct rows *)
+  assert_bool "Right diagonal should not be erroneous" (not erroneous);
+  assert_bool "Right diagonal should be the correct length" correct_length
 
 (* Note: this function is implemented in here mirroring the logic in run_game
    because using a function like this in run_game's implementation, each of
@@ -564,6 +563,10 @@ let ounit2_tests =
          >:: test_check_erroneous_completed_cols;
          "Check erroneous and completed boxes"
          >:: test_check_erroneous_completed_boxes;
+         "Check erroneous left diagonal"
+         >:: test_check_erroneous_completed_left_diag;
+         "Check erroneous right diagonal"
+         >:: test_check_erroneous_completed_right_diag;
          "Preset of CSV" >:: test_preset_of_csv;
          "Preset of CSV 2" >:: test_preset_of_csv_2;
          "Preset of CSV 3" >:: test_preset_of_csv_3;
