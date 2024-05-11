@@ -1,6 +1,4 @@
-(*To run the main method, use: 
-   dune exec ./bin/main.exe 
-in the terminal *)
+(*To run the main method, use: dune exec ./bin/main.exe in the terminal *)
 
 include Statistics
 
@@ -83,8 +81,7 @@ let rec get_input immutable_cells =
 
 let rec get_play_option () =
   let input_string = read_line () in
-  let regex = Str.regexp "^[1-4]$"
-  in
+  let regex = Str.regexp "^[1-4]$" in
   if Str.string_match regex input_string 0 then
     let number = int_of_string input_string in
     let () = clear_line () in
@@ -317,8 +314,8 @@ let rec run_game_d sudoku_grid immutable_cells grid_solved move_count start_time
         ("Congrats, you won!\nYou solved this sudoku puzzle in "
        ^ string_of_int move_count ^ " moves!\n" ^ "Total time taken: "
        ^ string_of_float solve_time ^ " seconds.\n"
-       ^ "Great job! We encourage you to play another exciting game of diagonal sudoku.\n"
-        );
+       ^ "Great job! We encourage you to play another exciting game of \
+          diagonal sudoku.\n");
       update_statistics statistics solve_time;
       display_statistics statistics
   | false -> (
@@ -332,7 +329,8 @@ let rec run_game_d sudoku_grid immutable_cells grid_solved move_count start_time
       print_sudoku_grid_d sudoku_grid erroneous_rows erroneous_cols
         erroneous_boxes ld_erroneous rd_erroneous completed_rows completed_cols
         completed_boxes ld_complete rd_complete immutable_cells;
-      print_endline "Options: (1) Enter move, (2) Get hint, (3) Get help, (4) Quit.";
+      print_endline
+        "Options: (1) Enter move, (2) Get hint, (3) Get help, (4) Quit.";
       let choice = get_play_option () in
       match choice with
       | 1 ->
@@ -351,12 +349,12 @@ let rec run_game_d sudoku_grid immutable_cells grid_solved move_count start_time
           (* Provide a hint to the user *)
           run_game_d sudoku_grid immutable_cells grid_solved move_count
             start_time statistics
-      | 3 -> 
-        let help_user_d_path = "data/private/help_user_d.txt" in
-        let lines = read_lines help_user_d_path in
-        let () = print_string_list lines in
-        (* Provide help to the user *)
-        run_game_d sudoku_grid immutable_cells grid_solved move_count
+      | 3 ->
+          let help_user_d_path = "data/private/help_user_d.txt" in
+          let lines = read_lines help_user_d_path in
+          let () = print_string_list lines in
+          (* Provide help to the user *)
+          run_game_d sudoku_grid immutable_cells grid_solved move_count
             start_time statistics
       | 4 -> ()
       | _ ->
@@ -367,4 +365,4 @@ let rec run_game_d sudoku_grid immutable_cells grid_solved move_count start_time
 (** Open AI. "Create a sudoku game in ocaml - Chat Conversation". Chat GPT.
     April 2024 *)
 
-(* Talk about parametes, update diagonal_sudoku.mli *)
+(* Talk about parameters, update diagonal_sudoku.mli *)

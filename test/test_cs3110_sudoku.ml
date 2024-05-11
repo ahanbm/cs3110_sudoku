@@ -5,8 +5,6 @@ open OUnit2
 open Cs3110_sudoku
 include Diagonal_sudoku
 
-let trivial_test _ = assert (0 = 0)
-
 let grid_rows_then_cols_test sudoku_grid erroneous_rows_count
     completed_rows_count erroneous_cols_count completed_cols_count _ =
   let erroneous_rows, completed_rows = check_all_rows sudoku_grid in
@@ -287,6 +285,105 @@ let test_preset_of_csv_3 _ =
   assert_bool "Cell at row 8, column 2 should be immutable"
     (PairSet.mem (7, 1) immutable_cells)
 
+let test_preset_of_csv_empty_cells _ =
+  let filename = "test_data/almost_solved_missing_topleft_cell.csv" in
+  let _, immutable_cells = preset_of_csv filename in
+  (* Assert that a cell with 0 value is not in the immutable cells set *)
+  assert_bool "(0, 0) should not be an immutable cell"
+    (not (PairSet.mem (0, 0) immutable_cells));
+  assert_bool "(1, 1) should be an immutable cell"
+    (PairSet.mem (1, 1) immutable_cells);
+  assert_bool "(2, 2) should be an immutable cell"
+    (PairSet.mem (2, 2) immutable_cells);
+  assert_bool "(3, 3) should be an immutable cell"
+    (PairSet.mem (3, 3) immutable_cells);
+  assert_bool "(4, 4) should be an immutable cell"
+    (PairSet.mem (4, 4) immutable_cells);
+  assert_bool "(5, 5) should be an immutable cell"
+    (PairSet.mem (5, 5) immutable_cells);
+  assert_bool "(6, 6) should be an immutable cell"
+    (PairSet.mem (6, 7) immutable_cells);
+  assert_bool "(7, 7) should be an immutable cell"
+    (PairSet.mem (7, 7) immutable_cells);
+  assert_bool "(8, 8) should be an immutable cell"
+    (PairSet.mem (8, 8) immutable_cells)
+
+let test_preset_of_csv_empty_cells2 _ =
+  let filename = "test_data/almost_solved_missing_row.csv" in
+  let _, immutable_cells = preset_of_csv filename in
+  (* Assert that a cell with 0 value is not in the immutable cells set *)
+  assert_bool "(8, 0) should not be an immutable cell"
+    (not (PairSet.mem (8, 0) immutable_cells));
+  assert_bool "(8, 1) should not be an immutable cell"
+    (not (PairSet.mem (8, 1) immutable_cells));
+  assert_bool "(8, 2) should not be an immutable cell"
+    (not (PairSet.mem (8, 2) immutable_cells));
+  assert_bool "(8, 3) should not be an immutable cell"
+    (not (PairSet.mem (8, 3) immutable_cells));
+  assert_bool "(8, 4) should not be an immutable cell"
+    (not (PairSet.mem (8, 4) immutable_cells));
+  assert_bool "(8, 5) should not be an immutable cell"
+    (not (PairSet.mem (8, 5) immutable_cells));
+  assert_bool "(8, 6) should not be an immutable cell"
+    (not (PairSet.mem (8, 6) immutable_cells));
+  assert_bool "(8, 7) should not be an immutable cell"
+    (not (PairSet.mem (8, 7) immutable_cells));
+  assert_bool "(8, 8) should not be an immutable cell"
+    (not (PairSet.mem (8, 8) immutable_cells));
+  assert_bool "(0, 0) should be an immutable cell"
+    (PairSet.mem (0, 0) immutable_cells);
+  assert_bool "(1, 1) should be an immutable cell"
+    (PairSet.mem (1, 1) immutable_cells);
+  assert_bool "(2, 2) should be an immutable cell"
+    (PairSet.mem (2, 2) immutable_cells);
+  assert_bool "(3, 3) should be an immutable cell"
+    (PairSet.mem (3, 3) immutable_cells);
+  assert_bool "(4, 4) should be an immutable cell"
+    (PairSet.mem (4, 4) immutable_cells);
+  assert_bool "(5, 5) should be an immutable cell"
+    (PairSet.mem (5, 5) immutable_cells);
+  assert_bool "(6, 6) should be an immutable cell"
+    (PairSet.mem (6, 6) immutable_cells);
+  assert_bool "(7, 7) should be an immutable cell"
+    (PairSet.mem (7, 7) immutable_cells)
+
+(* let test_preset_of_csv_invalid_value _ = let filename =
+   "test_data/grid_with_invalid_value.csv" in let _, immutable_cells =
+   preset_of_csv filename in (* Assert that cells with invalid values are not in
+   the immutable cells set *) assert_bool "(0, 0) should not be an immutable
+   cell" (not (PairSet.mem (0, 0) immutable_cells)); assert_bool "(8, 8) should
+   not be an immutable cell" (not (PairSet.mem (8, 8) immutable_cells)) *)
+
+let test_preset_of_csv_all_filled _ =
+  let filename = "test_data/solved.csv" in
+  let _, immutable_cells = preset_of_csv filename in
+  (* Assert that all cells are in the immutable cells set *)
+  for i = 0 to 8 do
+    for j = 0 to 8 do
+      assert_bool
+        (Printf.sprintf "(%d, %d) should be an immutable cell" i j)
+        (PairSet.mem (i, j) immutable_cells)
+    done
+  done
+
+let test_preset_of_csv_immutable_cells _ =
+  let filename = "test_data/almost_solved_missing_topleft_cell.csv" in
+  let _, immutable_cells = preset_of_csv filename in
+  (* Assert the number of immutable cells *)
+  assert_equal 80
+    (PairSet.cardinal immutable_cells)
+    ~msg:"Immutable cells set\n   should have 80 elements."
+
+(* let test_preset_of_csv_different_file _ = let filename =
+   "test_data/almost_solved_missing_row.csv" in let sudoku_grid, _ =
+   preset_of_csv filename in (* Assert dimensions of the sudoku grid *)
+   assert_equal 9 (Array.length sudoku_grid) ~msg:"Sudoku grid should have 9\n
+   rows"; assert_equal 9 (Array.length sudoku_grid.(0)) ~msg:"Sudoku grid
+   should\n have 9 columns"; (* Assert specific values in the grid *)
+   assert_equal 1 sudoku_grid.(0).(0) ~msg:"First cell should have value 1";
+   assert_equal 3 sudoku_grid.(0).(1) ~msg:"Second cell should have value 3";
+   assert_equal 4 sudoku_grid.(0).(2) ~msg:"Third cell should have value 4" *)
+
 let load_sudoku_grid_from_csv filename =
   let ic = open_in filename in
   let sudoku_grid = Array.make_matrix 9 9 0 in
@@ -368,7 +465,6 @@ let test_preset_of_csv_initial _ =
 let ounit2_tests =
   "ounit2 test suite"
   >::: [
-         "a trivial test" >:: trivial_test;
          "Test check_all_boxes" >:: test_check_all_boxes;
          "Test check_all_rows" >:: test_check_all_rows;
          "Test check_all_cols" >:: test_check_all_cols;
@@ -376,6 +472,11 @@ let ounit2_tests =
          "Preset of CSV 2" >:: test_preset_of_csv_2;
          "Preset of CSV 3" >:: test_preset_of_csv_3;
          "Preset of CSV Initial" >:: test_preset_of_csv_initial;
+         "Immutable cells with missing cell" >:: test_preset_of_csv_empty_cells;
+         "Immutable cells with missing row" >:: test_preset_of_csv_empty_cells2;
+         "Immutable cells in completed game" >:: test_preset_of_csv_all_filled;
+         "Number of immutable cells" >:: test_preset_of_csv_immutable_cells;
+         (* "BB" >:: test_preset_of_csv_different_file; *)
          "Empty Set" >:: test_cardinality_of_pair_set_empty;
          "Singleton Set" >:: test_cardinality_of_pair_set_singleton;
          "Large Set" >:: test_cardinality_of_pair_set_large;
