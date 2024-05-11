@@ -374,6 +374,30 @@ let test_preset_of_csv_immutable_cells _ =
     (PairSet.cardinal immutable_cells)
     ~msg:"Immutable cells set\n   should have 80 elements."
 
+let test_preset_of_csv_immutable_cells2 _ =
+  let filename = "test_data/almost_solved_missing_row.csv" in
+  let _, immutable_cells = preset_of_csv filename in
+  (* Assert the number of immutable cells *)
+  assert_equal 72
+    (PairSet.cardinal immutable_cells)
+    ~msg:"Immutable cells set\n   should have 72 elements."
+
+let test_preset_of_csv_immutable_cells3 _ =
+  let filename = "test_data/initial.csv" in
+  let _, immutable_cells = preset_of_csv filename in
+  (* Assert the number of immutable cells *)
+  assert_equal 1
+    (PairSet.cardinal immutable_cells)
+    ~msg:"Immutable cells set\n   should have 1 element."
+
+let test_preset_of_csv_immutable_cells4 _ =
+  let filename = "test_data/solved.csv" in
+  let _, immutable_cells = preset_of_csv filename in
+  (* Assert the number of immutable cells *)
+  assert_equal 81
+    (PairSet.cardinal immutable_cells)
+    ~msg:"Immutable cells set\n   should have 81 elements."
+
 (* let test_preset_of_csv_different_file _ = let filename =
    "test_data/almost_solved_missing_row.csv" in let sudoku_grid, _ =
    preset_of_csv filename in (* Assert dimensions of the sudoku grid *)
@@ -476,6 +500,12 @@ let ounit2_tests =
          "Immutable cells with missing row" >:: test_preset_of_csv_empty_cells2;
          "Immutable cells in completed game" >:: test_preset_of_csv_all_filled;
          "Number of immutable cells" >:: test_preset_of_csv_immutable_cells;
+         "Number of immutable cells for missing row"
+         >:: test_preset_of_csv_immutable_cells2;
+         "Number of immutable cells for initial"
+         >:: test_preset_of_csv_immutable_cells3;
+         "Number of immutable cells for solved game"
+         >:: test_preset_of_csv_immutable_cells4;
          (* "BB" >:: test_preset_of_csv_different_file; *)
          "Empty Set" >:: test_cardinality_of_pair_set_empty;
          "Singleton Set" >:: test_cardinality_of_pair_set_singleton;
