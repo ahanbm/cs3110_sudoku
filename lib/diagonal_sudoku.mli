@@ -45,7 +45,8 @@ val get_input : PairSet.t -> int * int * int
     immutable blue cells *)
 
 val get_play_option : unit -> int
-(** Gets input from the user in the desired format as an integer 1-4, clearing the line and re-prompting otherwise *)
+(** Gets input from the user in the desired format as an integer 1-4, clearing
+    the line and re-prompting otherwise *)
 
 val check_all_rows : int array array -> IntegerSet.t * IntegerSet.t
 (** Function to check each row of the sudoku grid and update their color if
@@ -82,6 +83,12 @@ val print_sudoku_grid_d :
   PairSet.t ->
   unit
 (** Function to print the sudoku grid *)
+
+val is_valid_move : 'a array array -> int -> int -> 'a -> bool
+(** Function to check if a move is valid *)
+
+val find_valid_move : int array array -> int -> int -> (int * int * int) option
+(** Function to find a valid move *)
 
 val run_game_d :
   int array array -> PairSet.t -> bool -> int -> float -> statistics -> unit

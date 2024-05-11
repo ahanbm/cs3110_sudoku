@@ -113,6 +113,77 @@ let is_solved sudoku_grid input_bool _ =
     && ld_complete && rd_complete)
     = input_bool)
 
+let test_is_valid_move _ =
+  let sudoku_grid = Array.make_matrix 9 9 0 in
+  assert_equal true (is_valid_move sudoku_grid 0 0 1);
+  (* Empty grid, any move is valid *)
+  sudoku_grid.(0).(0) <- 1;
+  assert_equal false (is_valid_move sudoku_grid 0 0 1);
+  (* Same cell, invalid move *)
+  assert_equal false (is_valid_move sudoku_grid 0 1 1);
+  (* Same row, invalid move *)
+  assert_equal false (is_valid_move sudoku_grid 1 0 1);
+  (* Same column, invalid move *)
+  sudoku_grid.(0).(0) <- 0;
+  sudoku_grid.(1).(1) <- 1;
+  assert_equal false (is_valid_move sudoku_grid 0 0 1);
+  (* Same box, invalid move *)
+  assert_equal true (is_valid_move sudoku_grid 0 0 2)
+(* Different number, valid move *)
+
+let test_find_valid_move _ =
+  let empty_grid = Array.make_matrix 9 9 0 in
+  let result = find_valid_move empty_grid 0 0 in
+  print_endline
+    ("Result: "
+    ^
+    match result with
+    | Some (x, y, z) ->
+        "(" ^ string_of_int x ^ ", " ^ string_of_int y ^ ", " ^ string_of_int z
+        ^ ")"
+    | None -> "None");
+  assert_equal (Some (0, 0, 1)) result;
+
+  let grid_with_first_row_filled = Array.make_matrix 9 9 0 in
+  Array.iteri
+    (fun i _ -> grid_with_first_row_filled.(0).(i) <- i + 1)
+    grid_with_first_row_filled.(0);
+  let result = find_valid_move grid_with_first_row_filled 0 0 in
+  print_endline
+    ("Result: "
+    ^
+    match result with
+    | Some (x, y, z) ->
+        "(" ^ string_of_int x ^ ", " ^ string_of_int y ^ ", " ^ string_of_int z
+        ^ ")"
+    | None -> "None");
+  assert_equal (Some (1, 0, 4)) result;
+
+  let grid_with_first_cell_filled = Array.make_matrix 9 9 0 in
+  grid_with_first_cell_filled.(0).(0) <- 1;
+  let result = find_valid_move grid_with_first_cell_filled 0 0 in
+  print_endline
+    ("Result: "
+    ^
+    match result with
+    | Some (x, y, z) ->
+        "(" ^ string_of_int x ^ ", " ^ string_of_int y ^ ", " ^ string_of_int z
+        ^ ")"
+    | None -> "None");
+  assert_equal (Some (0, 1, 2)) result;
+
+  let full_grid = Array.make_matrix 9 9 1 in
+  let result = find_valid_move full_grid 0 0 in
+  print_endline
+    ("Result: "
+    ^
+    match result with
+    | Some (x, y, z) ->
+        "(" ^ string_of_int x ^ ", " ^ string_of_int y ^ ", " ^ string_of_int z
+        ^ ")"
+    | None -> "None");
+  assert_equal None result
+
 let empty_grid = Array.make_matrix 9 9 0
 let homogenous_grid = Array.make_matrix 9 9 1
 let solved_grid_path = "test_data/solved.csv"
@@ -581,6 +652,8 @@ let ounit2_tests =
          >:: test_preset_of_csv_immutable_cells3;
          "Number of immutable cells for solved game"
          >:: test_preset_of_csv_immutable_cells4;
+         "Valid moves" >:: test_is_valid_move;
+         "Test find valid moves" >:: test_find_valid_move;
          (* "BB" >:: test_preset_of_csv_different_file; *)
          "Empty Set" >:: test_cardinality_of_pair_set_empty;
          "Singleton Set" >:: test_cardinality_of_pair_set_singleton;
