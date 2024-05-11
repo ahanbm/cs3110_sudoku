@@ -31,6 +31,23 @@ let grid_left_then_right_diagonals_test sudoku_grid ld_e_expected ld_c_expected
     && rd_complete = rd_c_expected
     && rd_erroneous = rd_e_expected)
 
+(* check this test *)
+let test_check_erroneous_completed_rows _ =
+  let filename = "test_data/2_erroneous_row.csv" in
+  let sudoku_grid, _ = preset_of_csv filename in
+  let erroneous_rows, completed_rows = check_all_rows sudoku_grid in
+  (* Assert that the erroneous rows set contains the correct rows *)
+  assert_bool "Row 0 should be erroneous" (IntegerSet.mem 0 erroneous_rows);
+  assert_bool "Row 8 should be erroneous" (IntegerSet.mem 8 erroneous_rows);
+  (* Assert that the completed rows set contains the correct rows *)
+  assert_bool "Row 1 should be completed" (IntegerSet.mem 1 completed_rows);
+  assert_bool "Row 2 should be completed" (IntegerSet.mem 2 completed_rows);
+  assert_bool "Row 3 should be completed" (IntegerSet.mem 3 completed_rows);
+  assert_bool "Row 4 should be completed" (IntegerSet.mem 4 completed_rows);
+  assert_bool "Row 5 should be completed" (IntegerSet.mem 5 completed_rows);
+  assert_bool "Row 6 should be completed" (IntegerSet.mem 6 completed_rows);
+  assert_bool "Row 7 should be completed" (IntegerSet.mem 7 completed_rows)
+
 (* Note: this function is implemented in here mirroring the logic in run_game
    because using a function like this in run_game's implementation, each of
    check_all_rows, check_all_cols, check_all_boxes, etc. would be computed
@@ -492,6 +509,8 @@ let ounit2_tests =
          "Test check_all_boxes" >:: test_check_all_boxes;
          "Test check_all_rows" >:: test_check_all_rows;
          "Test check_all_cols" >:: test_check_all_cols;
+         "Check erroneous and completed rows"
+         >:: test_check_erroneous_completed_rows;
          "Preset of CSV" >:: test_preset_of_csv;
          "Preset of CSV 2" >:: test_preset_of_csv_2;
          "Preset of CSV 3" >:: test_preset_of_csv_3;
