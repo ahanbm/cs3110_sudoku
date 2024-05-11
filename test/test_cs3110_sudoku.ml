@@ -1,4 +1,4 @@
-(**@authors: Peter Favero pmf66, Ahan Mishra abm247 *)
+(**@authors: Peter Favero pmf66, Ahan Mishra abm247, Peter Zheng pcz3 *)
 (*To compile, run: dune test in the terminal *)
 
 open OUnit2
