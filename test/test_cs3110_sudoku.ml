@@ -31,7 +31,6 @@ let grid_left_then_right_diagonals_test sudoku_grid ld_e_expected ld_c_expected
     && rd_complete = rd_c_expected
     && rd_erroneous = rd_e_expected)
 
-(* check this test *)
 let test_check_erroneous_completed_rows _ =
   let filename = "test_data/2_erroneous_row.csv" in
   let sudoku_grid, _ = preset_of_csv filename in
@@ -39,6 +38,56 @@ let test_check_erroneous_completed_rows _ =
   (* Assert that the erroneous rows set contains the correct rows *)
   assert_bool "Row 0 should be erroneous" (IntegerSet.mem 0 erroneous_rows);
   assert_bool "Row 8 should be erroneous" (IntegerSet.mem 8 erroneous_rows);
+  (* Assert that the completed rows set contains the correct rows *)
+  assert_bool "Row 1 should be completed" (IntegerSet.mem 1 completed_rows);
+  assert_bool "Row 2 should be completed" (IntegerSet.mem 2 completed_rows);
+  assert_bool "Row 3 should be completed" (IntegerSet.mem 3 completed_rows);
+  assert_bool "Row 4 should be completed" (IntegerSet.mem 4 completed_rows);
+  assert_bool "Row 5 should be completed" (IntegerSet.mem 5 completed_rows);
+  assert_bool "Row 6 should be completed" (IntegerSet.mem 6 completed_rows);
+  assert_bool "Row 7 should be completed" (IntegerSet.mem 7 completed_rows)
+
+let test_check_erroneous_completed_cols _ =
+  let filename = "test_data/2_erroneous_row.csv" in
+  let sudoku_grid, _ = preset_of_csv filename in
+  let erroneous_cols, completed_cols = check_all_cols sudoku_grid in
+  (* Assert that the erroneous cols set contains the correct cols *)
+  assert_bool "Column 1 should be erroneous" (IntegerSet.mem 1 erroneous_cols);
+  assert_bool "Column 8 should be erroneous" (IntegerSet.mem 8 erroneous_cols);
+  (* Assert that the completed cols set contains the correct cols *)
+  assert_bool "Column 0 should be completed" (IntegerSet.mem 0 completed_cols);
+  assert_bool "Column 2 should be completed" (IntegerSet.mem 2 completed_cols);
+  assert_bool "Column 3 should be completed" (IntegerSet.mem 3 completed_cols);
+  assert_bool "Column 4 should be completed" (IntegerSet.mem 4 completed_cols);
+  assert_bool "Column 5 should be completed" (IntegerSet.mem 5 completed_cols);
+  assert_bool "Column 6 should be completed" (IntegerSet.mem 6 completed_cols);
+  assert_bool "Column 7 should be completed" (IntegerSet.mem 7 completed_cols)
+
+let test_check_erroneous_completed_boxes _ =
+  let filename = "test_data/2_erroneous_row.csv" in
+  let sudoku_grid, _ = preset_of_csv filename in
+  let erroneous_boxes, completed_boxes = check_all_boxes sudoku_grid in
+  (* Assert that the erroneous boxes set contains the correct boxes *)
+  assert_bool "Box 0 should be erroneous" (PairSet.mem (0, 0) erroneous_boxes);
+  assert_bool "Box 8 should be erroneous" (PairSet.mem (6, 6) erroneous_boxes);
+  (* Assert that the completed boxes set contains the correct boxes *)
+  assert_bool "Box 1 should be completed" (PairSet.mem (0, 3) completed_boxes);
+  assert_bool "Box 2 should be completed" (PairSet.mem (0, 6) completed_boxes);
+  assert_bool "Box 3 should be completed" (PairSet.mem (3, 0) completed_boxes);
+  assert_bool "Box 4 should be completed" (PairSet.mem (3, 3) completed_boxes);
+  assert_bool "Box 5 should be completed" (PairSet.mem (3, 6) completed_boxes);
+  assert_bool "Box 6 should be completed" (PairSet.mem (6, 0) completed_boxes);
+  assert_bool "Box 7 should be completed" (PairSet.mem (6, 3) completed_boxes)
+
+(* left diagonal should be erroneous = true; and the length = 9 should be
+   false *)
+let test_check_erroneous_completed_diags _ =
+  let filename = "test_data/2_erroneous_row.csv" in
+  let sudoku_grid, _ = preset_of_csv filename in
+  let erroneous, completed_rows = check_diagonal sudoku_grid true in
+  (* Assert that the erroneous rows set contains the correct rows *)
+  assert_bool "Row 0 should be erroneous" (IntegerSet.mem 0 erroneous);
+  assert_bool "Row 8 should be erroneous" (IntegerSet.mem 8 erroneous);
   (* Assert that the completed rows set contains the correct rows *)
   assert_bool "Row 1 should be completed" (IntegerSet.mem 1 completed_rows);
   assert_bool "Row 2 should be completed" (IntegerSet.mem 2 completed_rows);
@@ -511,6 +560,10 @@ let ounit2_tests =
          "Test check_all_cols" >:: test_check_all_cols;
          "Check erroneous and completed rows"
          >:: test_check_erroneous_completed_rows;
+         "Check erroneous and completed columns"
+         >:: test_check_erroneous_completed_cols;
+         "Check erroneous and completed boxes"
+         >:: test_check_erroneous_completed_boxes;
          "Preset of CSV" >:: test_preset_of_csv;
          "Preset of CSV 2" >:: test_preset_of_csv_2;
          "Preset of CSV 3" >:: test_preset_of_csv_3;

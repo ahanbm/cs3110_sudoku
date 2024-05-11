@@ -6,4 +6,5 @@
   test_data/solved.csv
   test_data/initial.csv
   test_data/almost_solved_missing_row.csv
-  test_data/almost_solved_missing_topleft_cell.csv))
+  test_data/almost_solved_missing_topleft_cell.csv
+  test_data/2_erroneous_row.csv))
