@@ -25,15 +25,19 @@ let sudoku () =
   let welcome_user_d, help_user_d = initialize () in
   let input_path = "data/initial.csv" in
 
-  (* Initialize the set of cells and grid *)
-  let sudoku_grid, immutable_cells = preset_of_csv input_path in
-
   let () = welcome_user_d () in
   let () = help_user_d () in
   let start_time = Unix.gettimeofday () in
-  let () =
-    run_game_d sudoku_grid immutable_cells 1 start_time (Statistics.reset_statistics ())
+  let statistics = Statistics.reset_statistics () in
+  let rec games () =
+    (* Initialize the set of cells and grid *)
+    let sudoku_grid, immutable_cells = preset_of_csv input_path in
+
+    run_game_d sudoku_grid immutable_cells 1 start_time statistics;
+    print_endline "Would you like to play again (1) or stop (2):";
+    let input = read_line () in
+    if input = "1" then games () else print_endline "Thanks for playing!"
   in
-  ()
+  games ()
 
 let () = sudoku ()
