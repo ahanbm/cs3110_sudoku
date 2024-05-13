@@ -32,8 +32,7 @@ let sudoku () =
   let () = help_user_d () in
   let start_time = Unix.gettimeofday () in
   let () =
-    run_game_d sudoku_grid immutable_cells false 1 start_time
-      (Statistics.reset_statistics ())
+    run_game_d sudoku_grid immutable_cells 1 start_time (Statistics.reset_statistics ())
   in
   ()
 

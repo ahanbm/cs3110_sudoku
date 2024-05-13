@@ -12,10 +12,10 @@ let update_statistics stats game_duration =
 let display_statistics stats =
   Printf.printf "Statistics:\n";
   Printf.printf "Games played: %d\n" stats.games_played;
-  Printf.printf "Total time played: %.2f seconds\n" stats.total_time;
+  Printf.printf "Total time played: %.2f seconds.\n" stats.total_time;
   if stats.games_played > 0 then
     let average_time_per_game = stats.total_time /. float stats.games_played in
-    Printf.printf "Average time per game: %.2f seconds\n" average_time_per_game
+    Printf.printf "Average time per game: %.2f seconds.\n\n" average_time_per_game
 
 (** Open AI. "Implement sudoku statistics - Chat Conversation". Chat GPT. May
     2024 *)

@@ -91,7 +91,7 @@ val find_valid_move : int array array -> int -> int -> (int * int * int) option
 (** Function to find a valid move *)
 
 val run_game_d :
-  int array array -> PairSet.t -> bool -> int -> float -> statistics -> unit
+  int array array -> PairSet.t -> int -> float -> statistics -> unit
 (** Runs the game *)
 
 (** Open AI. "Write the mli file for this code - Chat Conversation". Chat GPT.

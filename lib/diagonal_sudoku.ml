@@ -304,28 +304,38 @@ let hint sudoku_grid =
       Printf.printf "Hint : Try placing %d in row %d, column %d.\n\n" number
         (row + 1) (col + 1)
 
-let rec run_game_d sudoku_grid immutable_cells grid_solved move_count start_time
-    statistics =
+let rec run_game_d sudoku_grid immutable_cells move_count start_time statistics =
+  let erroneous_rows, completed_rows = check_all_rows sudoku_grid in
+  let erroneous_cols, completed_cols = check_all_cols sudoku_grid in
+  let erroneous_boxes, completed_boxes = check_all_boxes sudoku_grid in
+  let ld_erroneous, ld_complete = check_left_diagonal sudoku_grid in
+  let rd_erroneous, rd_complete = check_right_diagonal sudoku_grid in
+  let grid_solved =
+    cardinality_of_int_set completed_rows = 9
+    && cardinality_of_int_set completed_cols = 9
+    && cardinality_of_pair_set completed_boxes = 9
+    && ld_complete && rd_complete
+  in
   match grid_solved with
   | true ->
       let end_time = Unix.time () in
       let solve_time = end_time -. start_time in
       print_endline
+        ("Sudoku Board | Move " ^ string_of_int (move_count - 1) ^ " :");
+      print_sudoku_grid_d sudoku_grid erroneous_rows erroneous_cols
+        erroneous_boxes ld_erroneous rd_erroneous completed_rows completed_cols
+        completed_boxes ld_complete rd_complete immutable_cells;
+      print_endline
         ("Congrats, you won!\nYou solved this sudoku puzzle in "
        ^ string_of_int move_count ^ " moves!\n" ^ "Total time taken: "
        ^ string_of_float solve_time ^ " seconds.\n"
        ^ "Great job! We encourage you to play another exciting game of \
-          diagonal sudoku.\n");
+          diagonal sudoku.");
       update_statistics statistics solve_time;
       display_statistics statistics
   | false -> (
       print_endline
         ("Sudoku Board | Move " ^ string_of_int (move_count - 1) ^ " :");
-      let erroneous_rows, completed_rows = check_all_rows sudoku_grid in
-      let erroneous_cols, completed_cols = check_all_cols sudoku_grid in
-      let erroneous_boxes, completed_boxes = check_all_boxes sudoku_grid in
-      let ld_erroneous, ld_complete = check_left_diagonal sudoku_grid in
-      let rd_erroneous, rd_complete = check_right_diagonal sudoku_grid in
       print_sudoku_grid_d sudoku_grid erroneous_rows erroneous_cols
         erroneous_boxes ld_erroneous rd_erroneous completed_rows completed_cols
         completed_boxes ld_complete rd_complete immutable_cells;
@@ -336,31 +346,22 @@ let rec run_game_d sudoku_grid immutable_cells grid_solved move_count start_time
       | 1 ->
           let row, col, number = get_input immutable_cells in
           sudoku_grid.(row - 1).(col - 1) <- number;
-          let grid_solved' =
-            cardinality_of_int_set completed_rows = 9
-            && cardinality_of_int_set completed_cols = 9
-            && cardinality_of_pair_set completed_boxes = 9
-            && ld_complete && rd_complete
-          in
-          run_game_d sudoku_grid immutable_cells grid_solved' (move_count + 1)
-            start_time statistics
+          run_game_d sudoku_grid immutable_cells (move_count + 1) start_time statistics
       | 2 ->
           hint sudoku_grid;
           (* Provide a hint to the user *)
-          run_game_d sudoku_grid immutable_cells grid_solved move_count
-            start_time statistics
+          run_game_d sudoku_grid immutable_cells  move_count start_time statistics
       | 3 ->
           let help_user_d_path = "data/private/help_user_d.txt" in
           let lines = read_lines help_user_d_path in
           let () = print_string_list lines in
           (* Provide help to the user *)
-          run_game_d sudoku_grid immutable_cells grid_solved move_count
-            start_time statistics
+          run_game_d sudoku_grid immutable_cells move_count start_time statistics
       | 4 -> ()
       | _ ->
           print_endline "Invalid choice. Please try again.";
-          run_game_d sudoku_grid immutable_cells grid_solved move_count
-            start_time statistics)
+          run_game_d sudoku_grid immutable_cells move_count start_time statistics
+  )
 
 (** Open AI. "Create a sudoku game in ocaml - Chat Conversation". Chat GPT.
     April 2024 *)
