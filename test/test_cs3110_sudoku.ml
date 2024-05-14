@@ -4,6 +4,8 @@
 open OUnit2
 open Cs3110_sudoku
 include Diagonal_sudoku
+include Statistics
+include Timer
 
 let grid_rows_then_cols_test sudoku_grid erroneous_rows_count
     completed_rows_count erroneous_cols_count completed_cols_count _ =
@@ -622,6 +624,94 @@ let test_preset_of_csv_initial _ =
     done
   done
 
+let test_reset_statistics _ =
+  let stats = reset_statistics () in
+  assert_equal 0 stats.games_played;
+  assert_equal 0. stats.total_time;
+  (* Check that resetting the statistics again still results in zero values *)
+  let stats = reset_statistics () in
+  assert_equal 0 stats.games_played;
+  assert_equal 0. stats.total_time;
+  (* Check that resetting the statistics after updating them results in zero
+     values *)
+  update_statistics stats 10.;
+  let stats = reset_statistics () in
+  assert_equal 0 stats.games_played;
+  assert_equal 0. stats.total_time
+
+let test_update_statistics _ =
+  let stats = reset_statistics () in
+  update_statistics stats 10.;
+  assert_equal 1 stats.games_played;
+  assert_equal 10. stats.total_time;
+  update_statistics stats 20.;
+  assert_equal 2 stats.games_played;
+  assert_equal 30. stats.total_time;
+  (* Check that updating the statistics with zero duration doesn't change the
+     total time *)
+  update_statistics stats 0.;
+  assert_equal 3 stats.games_played;
+  assert_equal 30. stats.total_time;
+  (* Check that updating the statistics after resetting them works correctly *)
+  let stats = reset_statistics () in
+  update_statistics stats 15.;
+  assert_equal 1 stats.games_played;
+  assert_equal 15. stats.total_time
+
+let test_display_statistics _ =
+  let stats = reset_statistics () in
+  update_statistics stats 10.;
+  update_statistics stats 20.;
+  (* Note: This test assumes that the display_statistics function prints the
+     correct output, but it does not check the actual output. *)
+  display_statistics stats;
+  (* Check that displaying the statistics doesn't change the statistics *)
+  assert_equal 2 stats.games_played;
+  assert_equal 30. stats.total_time;
+  (* Check that displaying the statistics after resetting them shows zero
+     values *)
+  let stats = reset_statistics () in
+  display_statistics stats;
+  assert_equal 0 stats.games_played;
+  assert_equal 0. stats.total_time
+
+let test_timer _ =
+  let timer = Timer.start () in
+  (* Sleep for 1 second to ensure that the timer is running *)
+  Unix.sleep 1;
+  let timer = Timer.stop timer in
+  let elapsed_seconds = Timer.elapsed_seconds timer in
+  let elapsed_ms = Timer.elapsed_ms timer in
+  (* Check that the elapsed time is at least 1 second and at most 2 seconds *)
+  assert_bool "elapsed_seconds" (elapsed_seconds >= 1. && elapsed_seconds < 2.);
+  (* Check that the elapsed time in milliseconds is at least 1000 and at most
+     2000 *)
+  assert_bool "elapsed_ms" (elapsed_ms >= 1000 && elapsed_ms < 2000)
+
+let test_timer_multiple_intervals _ =
+  let timer = Timer.start () in
+  (* Sleep for 1 second *)
+  Unix.sleep 1;
+  let timer = Timer.stop timer in
+  let elapsed_seconds = Timer.elapsed_seconds timer in
+  let elapsed_ms = Timer.elapsed_ms timer in
+  (* Check that the elapsed time is at least 1 second and at most 2 seconds *)
+  assert_bool "elapsed_seconds" (elapsed_seconds >= 1. && elapsed_seconds < 2.);
+  (* Check that the elapsed time in milliseconds is at least 1000 and at most
+     2000 *)
+  assert_bool "elapsed_ms" (elapsed_ms >= 1000 && elapsed_ms < 2000);
+  (* Start the timer again and sleep for another second *)
+  let timer = Timer.start () in
+  Unix.sleep 1;
+  let timer = Timer.stop timer in
+  let elapsed_seconds = Timer.elapsed_seconds timer in
+  let elapsed_ms = Timer.elapsed_ms timer in
+  (* Check that the elapsed time is at least 1 second and at most 2 seconds *)
+  assert_bool "elapsed_seconds" (elapsed_seconds >= 1. && elapsed_seconds < 2.);
+  (* Check that the elapsed time in milliseconds is at least 1000 and at most
+     2000 *)
+  assert_bool "elapsed_ms" (elapsed_ms >= 1000 && elapsed_ms < 2000)
+
 let ounit2_tests =
   "ounit2 test suite"
   >::: [
@@ -740,6 +830,11 @@ let ounit2_tests =
          "An almost-solved-with-empty-topleft-cell-grid should not be flagged \
           as solved by the logic in run_game"
          >:: is_solved solved_except_for_topleft_cell false;
+         "Reset statistics" >:: test_reset_statistics;
+         "Update statistics" >:: test_update_statistics;
+         "Display statistics" >:: test_display_statistics;
+         "Test timer" >:: test_timer;
+         "Test timer with multiple intervals" >:: test_timer_multiple_intervals;
        ]
 
 (* RUN TESTS *)
