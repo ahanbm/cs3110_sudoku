@@ -437,6 +437,24 @@ let test_preset_of_csv_3 _ =
   assert_bool "Cell at row 8, column 2 should be immutable"
     (PairSet.mem (7, 1) immutable_cells)
 
+let test_preset_of_csv_erroneous_row _ =
+  let filename = "test_data/2_erroneous_row.csv" in
+  let sudoku_grid, immutable_cells = preset_of_csv filename in
+  (* Check specific cells *)
+  assert_equal 2 sudoku_grid.(0).(0) ~msg:"Value at row 1, column 1 should be 2";
+  assert_equal 2 sudoku_grid.(0).(1) ~msg:"Value at row 1, column 2 should be 2";
+  (* Check immutable cells *)
+  assert_bool "Top left cell should be immutable"
+    (PairSet.mem (0, 0) immutable_cells);
+  assert_bool "Top right cell should be immutable"
+    (PairSet.mem (0, 8) immutable_cells);
+  assert_bool "Bottom right cell should be immutable"
+    (PairSet.mem (8, 8) immutable_cells);
+  (* Check some other cells *)
+  assert_equal 4 sudoku_grid.(0).(2) ~msg:"Value at row 1, column 3 should be 4";
+  assert_equal 3 sudoku_grid.(0).(3) ~msg:"Value at row 1, column 4 should be 3";
+  assert_equal 5 sudoku_grid.(0).(4) ~msg:"Value at row 1, column 5 should be 5"
+
 let test_preset_of_csv_empty_cells _ =
   let filename = "test_data/almost_solved_missing_topleft_cell.csv" in
   let _, immutable_cells = preset_of_csv filename in
@@ -691,6 +709,7 @@ let ounit2_tests =
          "Preset of CSV" >:: test_preset_of_csv;
          "Preset of CSV 2" >:: test_preset_of_csv_2;
          "Preset of CSV 3" >:: test_preset_of_csv_3;
+         "Preset of erroneous row CSV" >:: test_preset_of_csv_erroneous_row;
          "Preset of CSV Initial" >:: test_preset_of_csv_initial;
          "Immutable cells with missing cell" >:: test_preset_of_csv_empty_cells;
          "Immutable cells with missing row" >:: test_preset_of_csv_empty_cells2;
