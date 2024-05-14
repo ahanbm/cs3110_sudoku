@@ -81,7 +81,7 @@ let rec get_input immutable_cells =
 
 let rec get_play_option () =
   let input_string = read_line () in
-  let regex = Str.regexp "^[1-4]$" in
+  let regex = Str.regexp "^[1-6]$" in
   if Str.string_match regex input_string 0 then
     let number = int_of_string input_string in
     let () = clear_line () in
@@ -304,7 +304,53 @@ let hint sudoku_grid =
       Printf.printf "Hint : Try placing %d in row %d, column %d.\n\n" number
         (row + 1) (col + 1)
 
-let rec run_game_d sudoku_grid immutable_cells move_count start_time statistics =
+(* Define a type for the game state *)
+type game_state = {
+  grid : int array array;
+  immutable_cells : PairSet.t;
+}
+
+let deserialize_game_state str =
+  let lines = String.split_on_char '\n' str in
+  if List.length lines <> 9 then
+    failwith
+      "Invalid game state string: grid line doesn't contain exactly 9 rows"
+  else
+    let grid =
+      List.map
+        (fun line ->
+          let numbers = String.split_on_char ',' line in
+          if List.length numbers <> 9 then
+            failwith
+              "Invalid game state string: a row doesn't contain exactly 9 \
+               numbers"
+          else Array.of_list (List.map int_of_string numbers))
+        lines
+      |> Array.of_list
+    in
+    { grid; immutable_cells = PairSet.empty }
+
+(* Save the game state to a file *)
+let save_game filename sudoku_grid =
+  let oc = open_out filename in
+  let grid_str =
+    sudoku_grid |> Array.to_list
+    |> List.map (fun row ->
+           row |> Array.to_list |> List.map string_of_int |> String.concat ",")
+    |> String.concat "\n"
+  in
+  output_string oc grid_str;
+  close_out oc
+
+(* Load the game state from a file *)
+let load_game_state filename =
+  let ic = open_in filename in
+  let str = really_input_string ic (in_channel_length ic) in
+  close_in ic;
+  deserialize_game_state str
+
+let rec run_game_d sudoku_grid immutable_cells move_count start_time statistics
+    =
   let erroneous_rows, completed_rows = check_all_rows sudoku_grid in
   let erroneous_cols, completed_cols = check_all_cols sudoku_grid in
   let erroneous_boxes, completed_boxes = check_all_boxes sudoku_grid in
@@ -340,28 +386,44 @@ let rec run_game_d sudoku_grid immutable_cells move_count start_time statistics 
         erroneous_boxes ld_erroneous rd_erroneous completed_rows completed_cols
         completed_boxes ld_complete rd_complete immutable_cells;
       print_endline
-        "Options: (1) Enter move, (2) Get hint, (3) Get help, (4) Quit.";
+        "Options: (1) Enter move, (2) Get hint, (3) Get help, (4) Save game, \
+         (5) Load game, (6) Quit.";
       let choice = get_play_option () in
       match choice with
       | 1 ->
           let row, col, number = get_input immutable_cells in
           sudoku_grid.(row - 1).(col - 1) <- number;
-          run_game_d sudoku_grid immutable_cells (move_count + 1) start_time statistics
+          run_game_d sudoku_grid immutable_cells (move_count + 1) start_time
+            statistics
       | 2 ->
           hint sudoku_grid;
-          (* Provide a hint to the user *)
-          run_game_d sudoku_grid immutable_cells  move_count start_time statistics
+          run_game_d sudoku_grid immutable_cells move_count start_time
+            statistics
       | 3 ->
           let help_user_d_path = "data/private/help_user_d.txt" in
           let lines = read_lines help_user_d_path in
           let () = print_string_list lines in
-          (* Provide help to the user *)
-          run_game_d sudoku_grid immutable_cells move_count start_time statistics
-      | 4 -> ()
+          run_game_d sudoku_grid immutable_cells move_count start_time
+            statistics
+      | 4 ->
+          print_endline "Enter the filename to save the game state:";
+          let filename = read_line () in
+          save_game filename sudoku_grid;
+          print_endline "Game state saved successfully!";
+          run_game_d sudoku_grid immutable_cells move_count start_time
+            statistics
+      | 5 ->
+          print_endline "Enter the filename to load the game state:";
+          let filename = read_line () in
+          let loaded_state = load_game_state filename in
+          print_endline "Game state loaded successfully!";
+          run_game_d loaded_state.grid loaded_state.immutable_cells move_count
+            start_time statistics
+      | 6 -> ()
       | _ ->
           print_endline "Invalid choice. Please try again.";
-          run_game_d sudoku_grid immutable_cells move_count start_time statistics
-  )
+          run_game_d sudoku_grid immutable_cells move_count start_time
+            statistics)
 
 (** Open AI. "Create a sudoku game in ocaml - Chat Conversation". Chat GPT.
     April 2024 *)

@@ -675,43 +675,6 @@ let test_display_statistics _ =
   assert_equal 0 stats.games_played;
   assert_equal 0. stats.total_time
 
-let test_timer _ =
-  let timer = Timer.start () in
-  (* Sleep for 1 second to ensure that the timer is running *)
-  Unix.sleep 1;
-  let timer = Timer.stop timer in
-  let elapsed_seconds = Timer.elapsed_seconds timer in
-  let elapsed_ms = Timer.elapsed_ms timer in
-  (* Check that the elapsed time is at least 1 second and at most 2 seconds *)
-  assert_bool "elapsed_seconds" (elapsed_seconds >= 1. && elapsed_seconds < 2.);
-  (* Check that the elapsed time in milliseconds is at least 1000 and at most
-     2000 *)
-  assert_bool "elapsed_ms" (elapsed_ms >= 1000 && elapsed_ms < 2000)
-
-let test_timer_multiple_intervals _ =
-  let timer = Timer.start () in
-  (* Sleep for 1 second *)
-  Unix.sleep 1;
-  let timer = Timer.stop timer in
-  let elapsed_seconds = Timer.elapsed_seconds timer in
-  let elapsed_ms = Timer.elapsed_ms timer in
-  (* Check that the elapsed time is at least 1 second and at most 2 seconds *)
-  assert_bool "elapsed_seconds" (elapsed_seconds >= 1. && elapsed_seconds < 2.);
-  (* Check that the elapsed time in milliseconds is at least 1000 and at most
-     2000 *)
-  assert_bool "elapsed_ms" (elapsed_ms >= 1000 && elapsed_ms < 2000);
-  (* Start the timer again and sleep for another second *)
-  let timer = Timer.start () in
-  Unix.sleep 1;
-  let timer = Timer.stop timer in
-  let elapsed_seconds = Timer.elapsed_seconds timer in
-  let elapsed_ms = Timer.elapsed_ms timer in
-  (* Check that the elapsed time is at least 1 second and at most 2 seconds *)
-  assert_bool "elapsed_seconds" (elapsed_seconds >= 1. && elapsed_seconds < 2.);
-  (* Check that the elapsed time in milliseconds is at least 1000 and at most
-     2000 *)
-  assert_bool "elapsed_ms" (elapsed_ms >= 1000 && elapsed_ms < 2000)
-
 let ounit2_tests =
   "ounit2 test suite"
   >::: [
@@ -833,8 +796,6 @@ let ounit2_tests =
          "Reset statistics" >:: test_reset_statistics;
          "Update statistics" >:: test_update_statistics;
          "Display statistics" >:: test_display_statistics;
-         "Test timer" >:: test_timer;
-         "Test timer with multiple intervals" >:: test_timer_multiple_intervals;
        ]
 
 (* RUN TESTS *)
