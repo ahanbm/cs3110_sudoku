@@ -326,12 +326,12 @@ let test_preset_of_csv _ =
     ~msg:"Sudoku grid should have 9 columns";
   (* Assert specific values in the grid *)
   assert_equal 0 sudoku_grid.(0).(0) ~msg:"First cell should have value 0";
-  assert_equal 2 sudoku_grid.(0).(1) ~msg:"Second cell should have value 3";
+  assert_equal 2 sudoku_grid.(0).(1) ~msg:"Second cell should have value 2";
   assert_equal 5 sudoku_grid.(0).(2) ~msg:"Third cell should have value 5";
   assert_equal 5
     sudoku_grid.(8).(7)
-    ~msg:"Second to last cell in the last row should have value 7";
-  assert_equal 3 sudoku_grid.(8).(8) ~msg:"Last cell should have value 9";
+    ~msg:"Second to last cell in the last row should have value 5";
+  assert_equal 3 sudoku_grid.(8).(8) ~msg:"Last cell should have value 3";
   (* Assert immutable cells *)
   assert_bool "(0, 1) should be an immutable cell"
     (PairSet.mem (0, 1) immutable_cells);
@@ -340,23 +340,40 @@ let test_preset_of_csv _ =
   (* Assert cells that should not be immutable *)
   assert_bool "(0, 0) should not be an immutable cell"
     (not (PairSet.mem (0, 0) immutable_cells));
-  assert_bool "(8, 8) should be an immutable cell"
-    (PairSet.mem (8, 8) immutable_cells);
-
   (* Assert specific cells that should be immutable *)
   assert_bool "(1, 3) should be an immutable cell"
     (PairSet.mem (1, 3) immutable_cells);
+  assert_bool "(4, 1) should be an immutable cell"
+    (PairSet.mem (4, 1) immutable_cells);
+  assert_bool "(3, 5) should be an immutable cell"
+    (PairSet.mem (3, 5) immutable_cells);
   assert_bool "(5, 7) should be an immutable cell"
     (PairSet.mem (5, 7) immutable_cells);
+  assert_bool "(6, 6) should be an immutable cell"
+    (PairSet.mem (6, 6) immutable_cells);
+  assert_bool "(7, 8) should be an immutable cell"
+    (PairSet.mem (7, 8) immutable_cells);
+  assert_bool "(8, 8) should be an immutable cell"
+    (PairSet.mem (8, 8) immutable_cells);
   (* Continue assertions for immutable cells *)
   ()
 
 let test_preset_of_csv_2 _ =
   let filename = "test_data/almost_solved_missing_row.csv" in
   let sudoku_grid, immutable_cells = preset_of_csv filename in
+  assert_equal 9 (Array.length sudoku_grid)
+    ~msg:"Sudoku grid should have 9\n\n   rows";
+  assert_equal 9
+    (Array.length sudoku_grid.(0))
+    ~msg:"Sudoku grid\n   should\n have 9 columns";
   (* Check specific cells *)
   assert_equal 9 sudoku_grid.(0).(0) ~msg:"Value at row 1, column 1 should be 9";
+  assert_equal 2 sudoku_grid.(0).(1) ~msg:"Value at row 1, column 2 should be 2";
+  assert_equal 5 sudoku_grid.(0).(2) ~msg:"Value at row 1, column 3 should be 5";
+  assert_equal 3 sudoku_grid.(1).(0) ~msg:"Value at row 2, column 1 should be 3";
+  assert_equal 7 sudoku_grid.(2).(0) ~msg:"Value at row 3, column 1 should be 7";
   assert_equal 1 sudoku_grid.(0).(8) ~msg:"Value at row 1, column 9 should be 1";
+  assert_equal 0 sudoku_grid.(8).(0) ~msg:"Value at row 9, column 1 should be 0";
   assert_equal 0 sudoku_grid.(8).(8) ~msg:"Value at row 9, column 9 should be 0";
   (* Check immutable cells *)
   assert_bool "Top left cell should be immutable"
@@ -365,21 +382,19 @@ let test_preset_of_csv_2 _ =
     (PairSet.mem (0, 8) immutable_cells);
   assert_bool "Bottom right cell should not be immutable"
     (not (PairSet.mem (8, 8) immutable_cells));
-  (* Check some other cells *)
-  assert_equal 8 sudoku_grid.(1).(1) ~msg:"Value at row 2, column 2 should be 8";
-  assert_equal 1 sudoku_grid.(3).(4) ~msg:"Value at row 4, column 5 should be 1";
-  assert_equal 4 sudoku_grid.(7).(6) ~msg:"Value at row 8, column 7 should be 4";
-  (* Check some other immutable cells *)
   assert_bool "Cell at row 2, column 3 should be immutable"
     (PairSet.mem (1, 2) immutable_cells);
   assert_bool "Cell at row 4, column 5 should be immutable"
     (PairSet.mem (3, 4) immutable_cells);
   assert_bool "Cell at row 8, column 7 should be immutable"
     (PairSet.mem (7, 6) immutable_cells);
-  (* Check some non-existent cells *)
+  (* Check some other cells *)
+  assert_equal 8 sudoku_grid.(1).(1) ~msg:"Value at row 2, column 2 should be 8";
+  assert_equal 1 sudoku_grid.(3).(4) ~msg:"Value at row 4, column 5 should be 1";
+  assert_equal 4 sudoku_grid.(7).(6) ~msg:"Value at row 8, column 7 should be 4";
   assert_equal 8 sudoku_grid.(5).(0) ~msg:"Value at row 6, column 1 should be 8";
   assert_equal 3 sudoku_grid.(4).(7) ~msg:"Value at row 5, column 8 should be 0";
-  (* Check non-immutable cells *)
+  (* Check more immutable and non-immutable cells *)
   assert_bool "Cell at row 3, column 2 should be immutable"
     (PairSet.mem (2, 1) immutable_cells);
   assert_bool "Cell at row 6, column 5 should be immutable"
@@ -401,20 +416,19 @@ let test_preset_of_csv_3 _ =
     (PairSet.mem (0, 8) immutable_cells);
   assert_bool "Bottom right cell should be immutable"
     (PairSet.mem (8, 8) immutable_cells);
-  (* Check some other cells *)
-  assert_equal 4 sudoku_grid.(2).(2) ~msg:"Value at row 3, column 3 should be 4";
-  assert_equal 1 sudoku_grid.(3).(4) ~msg:"Value at row 4, column 5 should be 1";
-  assert_equal 1 sudoku_grid.(6).(6) ~msg:"Value at row 7, column 7 should be 1";
-  (* Check some other immutable cells *)
   assert_bool "Cell at row 3, column 2 should be immutable"
     (PairSet.mem (2, 1) immutable_cells);
   assert_bool "Cell at row 4, column 5 should be immutable"
     (PairSet.mem (3, 4) immutable_cells);
   assert_bool "Cell at row 7, column 7 should be immutable"
     (PairSet.mem (6, 6) immutable_cells);
-  (* Check some non-existent cells *)
+  (* Check some other cells *)
+  assert_equal 4 sudoku_grid.(2).(2) ~msg:"Value at row 3, column 3 should be 4";
+  assert_equal 1 sudoku_grid.(3).(4) ~msg:"Value at row 4, column 5 should be 1";
+  assert_equal 1 sudoku_grid.(6).(6) ~msg:"Value at row 7, column 7 should be 1";
   assert_equal 8 sudoku_grid.(5).(0) ~msg:"Value at row 6, column 1 should be 8";
   assert_equal 3 sudoku_grid.(4).(7) ~msg:"Value at row 5, column 8 should be 3";
+  assert_equal 9 sudoku_grid.(7).(2) ~msg:"Value at row 8, column 3 should be 9";
   (* Check non-immutable cells *)
   assert_bool "Cell at row 2, column 3 should be immutable"
     (PairSet.mem (1, 2) immutable_cells);
@@ -485,13 +499,6 @@ let test_preset_of_csv_empty_cells2 _ =
   assert_bool "(7, 7) should be an immutable cell"
     (PairSet.mem (7, 7) immutable_cells)
 
-(* let test_preset_of_csv_invalid_value _ = let filename =
-   "test_data/grid_with_invalid_value.csv" in let _, immutable_cells =
-   preset_of_csv filename in (* Assert that cells with invalid values are not in
-   the immutable cells set *) assert_bool "(0, 0) should not be an immutable
-   cell" (not (PairSet.mem (0, 0) immutable_cells)); assert_bool "(8, 8) should
-   not be an immutable cell" (not (PairSet.mem (8, 8) immutable_cells)) *)
-
 let test_preset_of_csv_all_filled _ =
   let filename = "test_data/solved.csv" in
   let _, immutable_cells = preset_of_csv filename in
@@ -535,16 +542,6 @@ let test_preset_of_csv_immutable_cells4 _ =
   assert_equal 81
     (PairSet.cardinal immutable_cells)
     ~msg:"Immutable cells set\n   should have 81 elements."
-
-(* let test_preset_of_csv_different_file _ = let filename =
-   "test_data/almost_solved_missing_row.csv" in let sudoku_grid, _ =
-   preset_of_csv filename in (* Assert dimensions of the sudoku grid *)
-   assert_equal 9 (Array.length sudoku_grid) ~msg:"Sudoku grid should have 9\n
-   rows"; assert_equal 9 (Array.length sudoku_grid.(0)) ~msg:"Sudoku grid
-   should\n have 9 columns"; (* Assert specific values in the grid *)
-   assert_equal 1 sudoku_grid.(0).(0) ~msg:"First cell should have value 1";
-   assert_equal 3 sudoku_grid.(0).(1) ~msg:"Second cell should have value 3";
-   assert_equal 4 sudoku_grid.(0).(2) ~msg:"Third cell should have value 4" *)
 
 let load_sudoku_grid_from_csv filename =
   let ic = open_in filename in
@@ -707,7 +704,6 @@ let ounit2_tests =
          >:: test_preset_of_csv_immutable_cells4;
          "Valid moves" >:: test_is_valid_move;
          "Test find valid moves" >:: test_find_valid_move;
-         (* "BB" >:: test_preset_of_csv_different_file; *)
          "Empty Set" >:: test_cardinality_of_pair_set_empty;
          "Singleton Set" >:: test_cardinality_of_pair_set_singleton;
          "Large Set" >:: test_cardinality_of_pair_set_large;
