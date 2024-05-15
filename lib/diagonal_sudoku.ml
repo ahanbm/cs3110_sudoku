@@ -299,7 +299,7 @@ let rec find_valid_move sudoku_grid row col =
 (* Function to provide a hint to the user *)
 let hint sudoku_grid =
   match find_valid_move sudoku_grid 0 0 with
-  | None -> print_endline "Hint : No valid moves available.\n\n"
+  | None -> print_endline "Hint : No empty squares available.\n\n"
   | Some (row, col, number) ->
       Printf.printf "Hint : Try placing %d in row %d, column %d.\n\n" number
         (row + 1) (col + 1)

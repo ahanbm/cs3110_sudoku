@@ -49,24 +49,24 @@ val get_play_option : unit -> int
     the line and re-prompting otherwise *)
 
 val check_all_rows : int array array -> IntegerSet.t * IntegerSet.t
-(** Function to check each row of the sudoku grid and update their color if
-    necessary *)
+(** Function to check each row of the sudoku grid and return a set that indicates the erroneous rows, 
+    and a set that indicates the completed rows *)
 
 val check_all_cols : int array array -> IntegerSet.t * IntegerSet.t
-(** Function to check each column of the sudoku grid and update their color if
-    necessary *)
+(** Function to check each col of the sudoku grid and return a set that indicates the erroneous cols, 
+    and a set that indicates the completed cols *)
 
 val check_all_boxes : int array array -> PairSet.t * PairSet.t
-(** Function to check each box of the sudoku grid and update their color if
-    necessary *)
+(** Function to check each box of the sudoku grid and return a set that indicates the erroneous boxes, 
+    and a set that indicates the completed boxes *)
 
 val check_left_diagonal : int array array -> bool * bool
-(** Function to check the left diagonal of the sudoku grid and update its color
-    if necessary *)
+(** Function to check the left diagonal of the sudoku grid and return a bool that indicates if it is erroneous
+    and a bool that indicates if it is completed *)
 
 val check_right_diagonal : int array array -> bool * bool
-(** Function to check the right diagonal of the sudoku grid and update its color
-    if necessary *)
+(** Function to check the right diagonal of the sudoku grid and return a bool that indicates if it is erroneous
+    and a bool that indicates if it is completed *)
 
 val print_sudoku_grid_d :
   int array array ->
