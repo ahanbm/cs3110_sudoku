@@ -373,10 +373,11 @@ let rec run_game_d sudoku_grid immutable_cells move_count start_time statistics
         completed_boxes ld_complete rd_complete immutable_cells;
       print_endline
         ("Congrats, you won!\nYou solved this sudoku puzzle in "
-       ^ string_of_int move_count ^ " moves!\n" ^ "Total time taken: "
-       ^ string_of_float solve_time ^ " seconds.\n"
-       ^ "Great job! We encourage you to play another exciting game of \
-          diagonal sudoku.");
+        ^ string_of_int (move_count - 1)
+        ^ " moves!\n" ^ "Total time taken: " ^ string_of_float solve_time
+        ^ " seconds.\n"
+        ^ "Great job! We encourage you to play another exciting game of \
+           diagonal sudoku.");
       update_statistics statistics solve_time;
       display_statistics statistics
   | false -> (
